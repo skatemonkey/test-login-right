@@ -2,7 +2,7 @@ import json
 from collections.abc import Generator
 from queue import Empty
 
-from flask import Blueprint, Response, jsonify, stream_with_context
+from flask import Blueprint, Response, jsonify, request, stream_with_context
 from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 from flask_pydantic import validate
 
@@ -21,7 +21,15 @@ def get_my_notifications():
     if user_id is None:
         return jsonify({"error": "Invalid access token"}), 401
 
-    result, status = notification_service.list_notifications(user_id)
+    page, page_size, error = _parse_pagination_query()
+    if error:
+        return jsonify(error), 400
+
+    result, status = notification_service.list_notifications_paginated(
+        user_id=user_id,
+        page=page,
+        page_size=page_size,
+    )
     return jsonify(result), status
 
 
@@ -132,3 +140,21 @@ def _resolve_current_user_id() -> int | None:
 
 def _to_sse(event: str, data: dict) -> str:
     return f"event: {event}\ndata: {json.dumps(data)}\n\n"
+
+
+def _parse_pagination_query() -> tuple[int, int, dict | None]:
+    raw_page = request.args.get("page", "1")
+    raw_page_size = request.args.get("pageSize", "10")
+
+    try:
+        page = int(raw_page)
+        page_size = int(raw_page_size)
+    except ValueError:
+        return 1, 10, {"error": "page and pageSize must be integers"}
+
+    if page < 1:
+        return 1, 10, {"error": "page must be >= 1"}
+    if page_size < 1:
+        return 1, 10, {"error": "pageSize must be >= 1"}
+
+    return page, page_size, None

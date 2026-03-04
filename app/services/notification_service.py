@@ -21,13 +21,42 @@ def create_notification(user_id: int, message: str) -> tuple[dict[str, Any], int
 
 
 def list_notifications(user_id: int) -> tuple[dict[str, Any], int]:
-    notifications = (
+    notifications_query = (
         Notification.query
         .filter(Notification.user_id == user_id)
         .order_by(Notification.created_at.desc())
+    )
+
+    notifications = notifications_query.all()
+    return {"data": [_to_notification_payload(item) for item in notifications]}, 200
+
+
+def list_notifications_paginated(user_id: int, page: int, page_size: int) -> tuple[dict[str, Any], int]:
+    notifications_query = (
+        Notification.query
+        .filter(Notification.user_id == user_id)
+        .order_by(Notification.created_at.desc(), Notification.id.desc())
+    )
+
+    total_elements = notifications_query.count()
+    total_pages = (total_elements + page_size - 1) // page_size if page_size > 0 else 0
+    offset = (page - 1) * page_size
+
+    notifications = (
+        notifications_query
+        .offset(offset)
+        .limit(page_size)
         .all()
     )
-    return {"data": [_to_notification_payload(item) for item in notifications]}, 200
+
+    return {
+        "data": [_to_notification_payload(item) for item in notifications],
+        "page": page,
+        "pageSize": page_size,
+        "totalElements": total_elements,
+        "totalPages": total_pages,
+        "hasMore": page < total_pages,
+    }, 200
 
 
 def mark_as_read(notification_id: int, user_id: int) -> tuple[dict[str, Any], int]:
