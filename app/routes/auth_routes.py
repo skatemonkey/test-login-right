@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint
 from flask_pydantic import validate
 from ..schemas.auth_schema import LoginRequest
 from ..services import auth_service
@@ -6,8 +6,8 @@ from ..services import auth_service
 auth_bp = Blueprint("auth", __name__)
 
 
-@auth_bp.route("/login", methods=["POST"])
+@auth_bp.post("/login")
 @validate()
 def login(body: LoginRequest):
-    result, status = auth_service.login(body)
-    return jsonify(result.model_dump()), status
+    result, status_code = auth_service.login(body)
+    return result.model_dump(), status_code
