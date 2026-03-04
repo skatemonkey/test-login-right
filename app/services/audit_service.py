@@ -1,10 +1,10 @@
 import json
 from datetime import datetime
-from ..db_models.audit_log import AuditLog
-from ..db_models.user import User
+from ..models.audit_log import AuditLog
+from ..models.user import User
 from ..schemas.audit_schema import AuditLogRequest, TableQuery, AuditLogItem, PaginatedAuditLogResponse
 from .. import db
-from ..utils import paginationUtils
+from ..utils import pagination_utils
 
 def create_log(req: AuditLogRequest, ip=str):
     details = req.details
@@ -29,7 +29,7 @@ def get_logs(query: TableQuery):
     q = db.session.query(AuditLog, User.username).join(User, AuditLog.user_id == User.user_id)
 
     # Search
-    q = paginationUtils.apply_search(q, query.search, [
+    q = pagination_utils.apply_search(q, query.search, [
         User.username, AuditLog.module, AuditLog.action, AuditLog.ip, AuditLog.device
     ])
 
@@ -46,11 +46,11 @@ def get_logs(query: TableQuery):
         'module': AuditLog.module,
         'action': AuditLog.action
     }
-    q = paginationUtils.apply_sorting(q, query.sortField or 'createdAt', query.sortOrder or 'desc', field_map,
+    q = pagination_utils.apply_sorting(q, query.sortField or 'createdAt', query.sortOrder or 'desc', field_map,
                                       AuditLog.created_time)
 
     # Paginate
-    results, total, total_pages = paginationUtils.paginate(q, query.page, query.pageSize)
+    results, total, total_pages = pagination_utils.paginate(q, query.page, query.pageSize)
 
     # Map
     data = [map_audit_log(log, username) for log, username in results]

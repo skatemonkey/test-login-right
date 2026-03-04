@@ -1,5 +1,5 @@
 from flask_jwt_extended import create_access_token
-from ..db_models.user import User
+from ..models.user import User
 from ..schemas.auth_schema import LoginRequest, LoginResponse, ErrorResponse
 
 
