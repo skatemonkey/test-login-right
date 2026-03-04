@@ -55,6 +55,17 @@ def mark_all_notifications_as_read():
     return jsonify(result), status
 
 
+@notification_bp.route("/unread-count/<int:user_id>", methods=["GET"])
+@jwt_required()
+def get_unread_count(user_id: int):
+    current_user_id = _resolve_current_user_id()
+    if current_user_id is None:
+        return jsonify({"error": "Invalid access token"}), 401
+
+    result, status = notification_service.get_unread_count(user_id)
+    return jsonify(result), status
+
+
 @notification_bp.route("/stream", methods=["GET"])
 @jwt_required()
 def stream_notifications():

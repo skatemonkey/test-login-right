@@ -55,11 +55,11 @@ def list_notifications_paginated(
         .all()
     )
 
-    unread_count = (
-        Notification.query
-        .filter(Notification.user_id == user_id, Notification.is_read.is_(False))
-        .count()
-    )
+    # unread_count = (
+    #     Notification.query
+    #     .filter(Notification.user_id == user_id, Notification.is_read.is_(False))
+    #     .count()
+    # )
 
     return NotificationPagination[NotificationItem](
         data=[_to_notification_payload(item) for item in notifications],
@@ -68,8 +68,18 @@ def list_notifications_paginated(
         totalElements=total_elements,
         totalPages=total_pages,
         hasMore=page < total_pages,
-        unreadCount=unread_count,
+        # unreadCount=unread_count,
     ), 200
+
+
+def get_unread_count(user_id: int) -> tuple[dict[str, int], int]:
+    unread_count = (
+        Notification.query
+        .filter(Notification.user_id == user_id, Notification.is_read.is_(False))
+        .count()
+    )
+
+    return {"userId": user_id, "unreadCount": unread_count}, 200
 
 
 def mark_as_read(notification_id: int, user_id: int) -> tuple[dict[str, Any], int]:

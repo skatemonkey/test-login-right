@@ -15,4 +15,4 @@ class PaginatedResponse(BaseModel, Generic[T]):
 
 class NotificationPagination(PaginatedResponse[T], Generic[T]):
     hasMore: bool
-    unreadCount: int
+    # unreadCount: int
