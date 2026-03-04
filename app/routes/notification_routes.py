@@ -30,7 +30,7 @@ def get_my_notifications():
         page=page,
         page_size=page_size,
     )
-    return jsonify(result), status
+    return jsonify(result.model_dump()), status
 
 
 @notification_bp.route("/<int:notification_id>/read", methods=["PATCH"])

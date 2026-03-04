@@ -11,3 +11,4 @@ class PaginatedResponse(BaseModel, Generic[T]):
     pageSize: int
     totalElements: int
     totalPages: int
+    hasMore: bool | None = None

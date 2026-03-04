@@ -2,6 +2,8 @@ from typing import Any
 
 from .. import db
 from ..models.notification import Notification
+from ..schemas.notification_schema import NotificationItem
+from ..schemas.pagination_schema import PaginatedResponse
 from .notification_stream import notification_hub
 
 
@@ -31,7 +33,11 @@ def list_notifications(user_id: int) -> tuple[dict[str, Any], int]:
     return {"data": [_to_notification_payload(item) for item in notifications]}, 200
 
 
-def list_notifications_paginated(user_id: int, page: int, page_size: int) -> tuple[dict[str, Any], int]:
+def list_notifications_paginated(
+    user_id: int,
+    page: int,
+    page_size: int,
+) -> tuple[PaginatedResponse[NotificationItem], int]:
     notifications_query = (
         Notification.query
         .filter(Notification.user_id == user_id)
@@ -49,14 +55,14 @@ def list_notifications_paginated(user_id: int, page: int, page_size: int) -> tup
         .all()
     )
 
-    return {
-        "data": [_to_notification_payload(item) for item in notifications],
-        "page": page,
-        "pageSize": page_size,
-        "totalElements": total_elements,
-        "totalPages": total_pages,
-        "hasMore": page < total_pages,
-    }, 200
+    return PaginatedResponse[NotificationItem](
+        data=[_to_notification_payload(item) for item in notifications],
+        page=page,
+        pageSize=page_size,
+        totalElements=total_elements,
+        totalPages=total_pages,
+        hasMore=page < total_pages,
+    ), 200
 
 
 def mark_as_read(notification_id: int, user_id: int) -> tuple[dict[str, Any], int]:

@@ -62,7 +62,8 @@ def get_logs(query: TableQuery):
         page=query.page,
         pageSize=query.pageSize,
         totalElements=total,
-        totalPages=total_pages
+        totalPages=total_pages,
+        hasMore=query.page < total_pages
     ), 200
 
 
