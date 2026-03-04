@@ -26,5 +26,7 @@ def create_app():
     app.register_blueprint(table_bp, url_prefix="/tables")
     from app.module.permission.permission_routes import permission_bp
     app.register_blueprint(permission_bp, url_prefix="/permissions")
+    from app.module.user.user_routes import user_bp
+    app.register_blueprint(user_bp, url_prefix="/users")
 
     return app
