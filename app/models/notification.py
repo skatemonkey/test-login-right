@@ -11,7 +11,7 @@ class Notification(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey('py_mgmt_test.user.user_id'), nullable=False)
     message = Column(String(500), nullable=False)
-    is_read = Column(Boolean, nullable=True, default=False)
+    is_read = Column(Boolean, nullable=False, default=False)
     created_at = Column(DateTime, nullable=False, default=now_utc0)
 
     user = relationship('User', back_populates='notifications')
