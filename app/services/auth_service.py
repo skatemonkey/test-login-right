@@ -13,5 +13,8 @@ def login(req: LoginRequest):
         for up in user.permissions
     ]
 
-    access_token = create_access_token(identity=user.username)
-    return LoginResponse(user_id=user.user_id,access_token=access_token, permissions=permissions), 200
+    access_token = create_access_token(
+        identity=user.username,
+        additional_claims={"user_id": user.user_id},
+    )
+    return LoginResponse(user_id=user.user_id, access_token=access_token, permissions=permissions), 200

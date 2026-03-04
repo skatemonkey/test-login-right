@@ -28,7 +28,10 @@ class Config:
     JWT_SECRET_KEY = "your-super-secret-key-change-in-production"
 
     # Token expires in 30 minutes
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=3)
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=120)
+    JWT_TOKEN_LOCATION = ["headers", "query_string"]
+    JWT_QUERY_STRING_NAME = "access_token"
+    JWT_QUERY_STRING_VALUE_PREFIX = ""
 
     # MySQL Database Configuration
     SQLALCHEMY_DATABASE_URI = _get_db3_uri()

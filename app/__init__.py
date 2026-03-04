@@ -20,5 +20,7 @@ def create_app():
     app.register_blueprint(auth_bp, url_prefix="/auth")
     from app.routes.audit_routes import audit_bp
     app.register_blueprint(audit_bp, url_prefix="/audit")
+    from app.routes.notification_routes import notification_bp
+    app.register_blueprint(notification_bp, url_prefix="/notifications")
 
     return app
