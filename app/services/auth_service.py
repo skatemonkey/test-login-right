@@ -16,7 +16,7 @@ def login(req: LoginRequest):
     ]
 
     access_token = create_access_token(
-        identity=str(user.user_id),
+        identity=user.user_id,
         additional_claims={"username": user.username}
     )
     return LoginResponse(user_id=user.user_id, username=user.username, access_token=access_token,
