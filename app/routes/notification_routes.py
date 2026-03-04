@@ -3,13 +3,12 @@ from collections.abc import Generator
 from queue import Empty
 
 from flask import Blueprint, Response, jsonify, stream_with_context
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_pydantic import validate
 
 from ..schemas.notification_schema import MockApproveRequest, NotificationListQuery
 from ..services import notification_service
 from ..services.notification_stream import notification_hub
-from ..utils.auth_utils import get_user_id_from_jwt
 
 notification_bp = Blueprint("notification", __name__)
 
@@ -18,12 +17,8 @@ notification_bp = Blueprint("notification", __name__)
 @jwt_required()
 @validate()
 def get_my_notifications(query: NotificationListQuery):
-    user_id = get_user_id_from_jwt()
-    if user_id is None:
-        return jsonify({"error": "Invalid access token"}), 401
-
     result, status = notification_service.list_notifications_paginated(
-        user_id=user_id,
+        user_id=get_jwt_identity(),
         page=query.page,
         page_size=query.pageSize,
     )
@@ -34,11 +29,7 @@ def get_my_notifications(query: NotificationListQuery):
 @jwt_required()
 @validate()
 def mark_notification_as_read(notification_id: int):
-    user_id = get_user_id_from_jwt()
-    if user_id is None:
-        return jsonify({"error": "Invalid access token"}), 401
-
-    result, status = notification_service.mark_as_read(notification_id, user_id)
+    result, status = notification_service.mark_as_read(notification_id, get_jwt_identity())
     return jsonify(result), status
 
 
@@ -46,25 +37,15 @@ def mark_notification_as_read(notification_id: int):
 @jwt_required()
 @validate()
 def mark_all_notifications_as_read():
-    user_id = get_user_id_from_jwt()
-    if user_id is None:
-        return jsonify({"error": "Invalid access token"}), 401
-
-    result, status = notification_service.mark_all_as_read(user_id)
+    result, status = notification_service.mark_all_as_read(get_jwt_identity())
     return jsonify(result), status
 
 
-@notification_bp.get("/unread-count/<int:user_id>")
+@notification_bp.get("/unread-count")
 @jwt_required()
 @validate()
-def get_unread_count(user_id: int):
-    current_user_id = get_user_id_from_jwt()
-    if current_user_id is None:
-        return jsonify({"error": "Invalid access token"}), 401
-    if current_user_id != user_id:
-        return jsonify({"error": "Forbidden"}), 403
-
-    result, status = notification_service.get_unread_count(user_id)
+def get_unread_count():
+    result, status = notification_service.get_unread_count(get_jwt_identity())
     return jsonify(result), status
 
 
@@ -72,9 +53,7 @@ def get_unread_count(user_id: int):
 @jwt_required()
 @validate()
 def stream_notifications():
-    user_id = get_user_id_from_jwt()
-    if user_id is None:
-        return jsonify({"error": "Invalid access token"}), 401
+    user_id = get_jwt_identity()
 
     connection_id, event_queue = notification_hub.subscribe(user_id)
     print(
@@ -118,9 +97,7 @@ def stream_notifications():
 @jwt_required()
 @validate()
 def mock_approve(body: MockApproveRequest):
-    approver_user_id = get_user_id_from_jwt()
-    if approver_user_id is None:
-        return jsonify({"error": "Invalid access token"}), 401
+    approver_user_id = get_jwt_identity()
 
     item_label = body.itemId if body.itemId is not None else "N/A"
     message = f"Item {item_label} was approved by user {approver_user_id}."
