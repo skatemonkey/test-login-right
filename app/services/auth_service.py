@@ -17,4 +17,5 @@ def login(req: LoginRequest):
         identity=user.username,
         additional_claims={"user_id": user.user_id},
     )
-    return LoginResponse(user_id=user.user_id, access_token=access_token, permissions=permissions), 200
+    return LoginResponse(user_id=user.user_id, username=user.username, access_token=access_token,
+                         permissions=permissions), 200
