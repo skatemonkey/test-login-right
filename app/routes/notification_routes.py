@@ -9,7 +9,7 @@ from flask_pydantic import validate
 from ..schemas.notification_schema import MockApproveRequest, NotificationListQuery
 from ..services import notification_service
 from ..services.notification_stream import notification_hub
-from ..utils.auth_utils import resolve_current_user_id
+from ..utils.auth_utils import get_user_id_from_jwt
 
 notification_bp = Blueprint("notification", __name__)
 
@@ -18,7 +18,7 @@ notification_bp = Blueprint("notification", __name__)
 @jwt_required()
 @validate()
 def get_my_notifications(query: NotificationListQuery):
-    user_id = resolve_current_user_id()
+    user_id = get_user_id_from_jwt()
     if user_id is None:
         return jsonify({"error": "Invalid access token"}), 401
 
@@ -34,7 +34,7 @@ def get_my_notifications(query: NotificationListQuery):
 @jwt_required()
 @validate()
 def mark_notification_as_read(notification_id: int):
-    user_id = resolve_current_user_id()
+    user_id = get_user_id_from_jwt()
     if user_id is None:
         return jsonify({"error": "Invalid access token"}), 401
 
@@ -46,7 +46,7 @@ def mark_notification_as_read(notification_id: int):
 @jwt_required()
 @validate()
 def mark_all_notifications_as_read():
-    user_id = resolve_current_user_id()
+    user_id = get_user_id_from_jwt()
     if user_id is None:
         return jsonify({"error": "Invalid access token"}), 401
 
@@ -58,7 +58,7 @@ def mark_all_notifications_as_read():
 @jwt_required()
 @validate()
 def get_unread_count(user_id: int):
-    current_user_id = resolve_current_user_id()
+    current_user_id = get_user_id_from_jwt()
     if current_user_id is None:
         return jsonify({"error": "Invalid access token"}), 401
     if current_user_id != user_id:
@@ -72,7 +72,7 @@ def get_unread_count(user_id: int):
 @jwt_required()
 @validate()
 def stream_notifications():
-    user_id = resolve_current_user_id()
+    user_id = get_user_id_from_jwt()
     if user_id is None:
         return jsonify({"error": "Invalid access token"}), 401
 
@@ -118,7 +118,7 @@ def stream_notifications():
 @jwt_required()
 @validate()
 def mock_approve(body: MockApproveRequest):
-    approver_user_id = resolve_current_user_id()
+    approver_user_id = get_user_id_from_jwt()
     if approver_user_id is None:
         return jsonify({"error": "Invalid access token"}), 401
 
