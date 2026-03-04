@@ -80,26 +80,6 @@ def map_permission(permission):
     )
 
 
-def get_options():
-    modules = [
-        row[0]
-        for row in db.session.query(Permission.module)
-        .distinct()
-        .order_by(Permission.module.asc())
-        .all()
-        if row[0]
-    ]
-    actions = [
-        row[0]
-        for row in db.session.query(Permission.action)
-        .distinct()
-        .order_by(Permission.action.asc())
-        .all()
-        if row[0]
-    ]
-    return {"modules": modules, "actions": actions}, 200
-
-
 def create_permission(body: PermissionCreateRequest):
     module = normalize_text(body.module)
     action = normalize_text(body.action)

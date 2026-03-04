@@ -20,14 +20,6 @@ def get_permissions(body: PermissionListQuery):
     return jsonify(result.model_dump()), status
 
 
-@permission_bp.get("/options")
-@jwt_required()
-@validate()
-def get_filter_options():
-    result, status = permission_service.get_options()
-    return jsonify(result), status
-
-
 @permission_bp.post("")
 @jwt_required()
 @validate()
