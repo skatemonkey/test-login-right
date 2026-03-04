@@ -28,7 +28,7 @@ class TableQuery(BaseModel):
 
 class AuditLogItem(BaseModel):
     id: int
-    username: str
+    username: str | None = None
     ip: str
     device: str
     createdAt: str
