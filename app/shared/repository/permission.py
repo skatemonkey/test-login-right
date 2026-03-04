@@ -5,7 +5,7 @@ from sqlalchemy import DateTime, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core import db
-from app.common.utils.time import now_utc0
+from app.shared.utils.time import now_utc0
 
 if TYPE_CHECKING:
     from .user_permission import UserPermission

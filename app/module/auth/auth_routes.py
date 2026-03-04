@@ -1,6 +1,6 @@
 from flask import Blueprint
 from flask_pydantic import validate
-from app.common.schemas.auth_schema import LoginRequest
+from app.shared.schemas.auth_schema import LoginRequest
 from app.module.auth import auth_service
 
 auth_bp = Blueprint("auth", __name__)

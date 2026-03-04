@@ -4,7 +4,7 @@ from sqlalchemy import DateTime, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core import db
-from app.common.utils.time import now_utc0
+from app.shared.utils.time import now_utc0
 
 
 class AuditLog(db.Model):

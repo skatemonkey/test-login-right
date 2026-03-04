@@ -3,9 +3,9 @@ from typing import Any
 from sqlalchemy import update
 
 from app.core import db
-from app.common.repository import Notification
-from app.common.schemas.notification_schema import NotificationItem
-from app.common.schemas.pagination_schema import NotificationPagination
+from app.shared.repository import Notification
+from app.shared.schemas.notification_schema import NotificationItem
+from app.shared.schemas.pagination_schema import NotificationPagination
 from app.module.notification.notification_stream import notification_hub
 
 

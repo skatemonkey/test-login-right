@@ -6,10 +6,10 @@ from flask import Blueprint, Response, jsonify, stream_with_context
 from flask_jwt_extended import jwt_required
 from flask_pydantic import validate
 
-from app.common.schemas.notification_schema import MockApproveRequest, NotificationListQuery
+from app.shared.schemas.notification_schema import MockApproveRequest, NotificationListQuery
 from app.module.notification import notification_service
 from app.module.notification.notification_stream import notification_hub
-from app.common.utils import auth as auth_utils
+from app.shared.utils import auth as auth_utils
 
 notification_bp = Blueprint("notification", __name__)
 

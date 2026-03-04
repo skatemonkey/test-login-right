@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_pydantic import validate
 from flask_jwt_extended import jwt_required
-from app.common.schemas.audit_schema import AuditLogRequest, TableQuery
+from app.shared.schemas.audit_schema import AuditLogRequest, TableQuery
 from app.module.audit import audit_service
 
 audit_bp = Blueprint("audit", __name__)

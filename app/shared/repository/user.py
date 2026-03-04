@@ -5,10 +5,10 @@ from sqlalchemy import Boolean, DateTime, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core import db
-from app.common.utils.time import now_utc0
+from app.shared.utils.time import now_utc0
 
 if TYPE_CHECKING:
-    from app.common.repository.notification import Notification
+    from app.shared.repository.notification import Notification
     from .user_permission import UserPermission
 
 
