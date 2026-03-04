@@ -20,3 +20,4 @@ class User(db.Model):
     updated_at = Column(DateTime, nullable=False, default=now_utc8, onupdate=now_utc8)
 
     permissions = relationship('UserPermission', back_populates='user', cascade='all, delete-orphan')
+    notifications = relationship('Notification', back_populates='user', cascade='all, delete-orphan')
