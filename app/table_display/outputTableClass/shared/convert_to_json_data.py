@@ -3,6 +3,8 @@ import traceback
 from dataclasses import asdict
 
 from ...models.table_model import CellDataConfig, TableDataConfig
+from .style_resolver import get_style
+from .value_format_resolver import get_value
 
 
 def convert_to_json_data(self):
@@ -12,6 +14,8 @@ def convert_to_json_data(self):
 
         columns = list(data.keys())
         num_rows = len(data[columns[0]])
+        style_settings = getattr(self, "style_settings", {})
+        value_format_settings = getattr(self, "value_format_settings", {})
 
         cell_data = []
 
@@ -20,21 +24,41 @@ def convert_to_json_data(self):
             CellDataConfig(
                 row=0,
                 col=col_idx,
-                value=self.columnNames.get(col_name, col_name),
-                style=1
+                value=get_value(
+                    value_format_settings=value_format_settings,
+                    row=0,
+                    col=col_idx,
+                    value=self.columnNames.get(col_name, col_name)
+                ),
+                style=get_style(
+                    style_settings=style_settings,
+                    row=0,
+                    col=col_idx,
+                    value=self.columnNames.get(col_name, col_name)
+                )
             )
             for col_idx, col_name in enumerate(columns)
         ]
         cell_data.append(header_row)
 
         # Data rows
-        for row_idx in range(num_rows):
+        for data_row_idx in range(num_rows):
             data_row = [
                 CellDataConfig(
-                    row=row_idx + 1,
+                    row=data_row_idx + 1,
                     col=col_idx,
-                    value=str(data[col_name][row_idx]),
-                    style=2
+                    value=get_value(
+                        value_format_settings=value_format_settings,
+                        row=data_row_idx + 1,
+                        col=col_idx,
+                        value=data[col_name][data_row_idx]
+                    ),
+                    style=get_style(
+                        style_settings=style_settings,
+                        row=data_row_idx + 1,
+                        col=col_idx,
+                        value=data[col_name][data_row_idx]
+                    )
                 )
                 for col_idx, col_name in enumerate(columns)
             ]
