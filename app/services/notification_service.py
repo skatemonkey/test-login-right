@@ -78,7 +78,10 @@ def get_unread_count(user_id: int) -> tuple[dict[str, int], int]:
 
 
 def mark_as_read(notification_id: int, user_id: int) -> tuple[dict[str, Any], int]:
-    notification = Notification.query.filter_by(id=notification_id, user_id=user_id).first()
+    notification: Notification | None = Notification.query.filter_by(
+        id=notification_id,
+        user_id=user_id,
+    ).first()
     if not notification:
         return {"error": "Notification not found"}, 404
 
@@ -86,7 +89,10 @@ def mark_as_read(notification_id: int, user_id: int) -> tuple[dict[str, Any], in
         notification.is_read = True
         db.session.commit()
 
-    return {"message": "Notification marked as read"}, 200
+    return {
+        "message": "Notification marked as read",
+        "notification": _to_notification_payload(notification),
+    }, 200
 
 
 def mark_all_as_read(user_id: int) -> tuple[dict[str, Any], int]:
