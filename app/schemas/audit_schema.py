@@ -36,10 +36,3 @@ class AuditLogItem(BaseModel):
     action: str
     details: str
 
-
-class PaginatedAuditLogResponse(BaseModel):
-    data: List[AuditLogItem]
-    page: int
-    pageSize: int
-    totalElements: int
-    totalPages: int

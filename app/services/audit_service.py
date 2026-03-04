@@ -2,7 +2,8 @@ import json
 from datetime import datetime
 from ..models.audit_log import AuditLog
 from ..models.user import User
-from ..schemas.audit_schema import AuditLogRequest, TableQuery, AuditLogItem, PaginatedAuditLogResponse
+from ..schemas.audit_schema import AuditLogRequest, TableQuery, AuditLogItem
+from ..schemas.pagination_schema import PaginatedResponse
 from .. import db
 from ..utils import pagination_utils
 
@@ -56,7 +57,7 @@ def get_logs(query: TableQuery):
     # Map
     data = [map_audit_log(log, username) for log, username in results]
 
-    return PaginatedAuditLogResponse(
+    return PaginatedResponse[AuditLogItem](
         data=data,
         page=query.page,
         pageSize=query.pageSize,
