@@ -3,7 +3,7 @@ from typing import Any
 from .. import db
 from ..models.notification import Notification
 from ..schemas.notification_schema import NotificationItem
-from ..schemas.pagination_schema import PaginatedResponse
+from ..schemas.pagination_schema import NotificationPagination
 from .notification_stream import notification_hub
 
 
@@ -37,7 +37,7 @@ def list_notifications_paginated(
     user_id: int,
     page: int,
     page_size: int,
-) -> tuple[PaginatedResponse[NotificationItem], int]:
+) -> tuple[NotificationPagination[NotificationItem], int]:
     notifications_query = (
         Notification.query
         .filter(Notification.user_id == user_id)
@@ -55,13 +55,20 @@ def list_notifications_paginated(
         .all()
     )
 
-    return PaginatedResponse[NotificationItem](
+    unread_count = (
+        Notification.query
+        .filter(Notification.user_id == user_id, Notification.is_read.is_(False))
+        .count()
+    )
+
+    return NotificationPagination[NotificationItem](
         data=[_to_notification_payload(item) for item in notifications],
         page=page,
         pageSize=page_size,
         totalElements=total_elements,
         totalPages=total_pages,
         hasMore=page < total_pages,
+        unreadCount=unread_count,
     ), 200
 
 
