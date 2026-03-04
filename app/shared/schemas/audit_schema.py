@@ -1,5 +1,7 @@
+from typing import Optional, Union
+
 from pydantic import BaseModel
-from typing import Optional, Union, List, Any
+from app.shared.schemas.pagination_schema import TableQueryBase
 
 
 class AuditLogRequest(BaseModel):
@@ -17,12 +19,7 @@ class AuditLogFilters(BaseModel):
     dateTo: Optional[str] = None
 
 
-class TableQuery(BaseModel):
-    page: int
-    pageSize: int
-    sortField: Optional[str] = None
-    sortOrder: Optional[str] = None
-    search: Optional[str] = None
+class AuditLogQuery(TableQueryBase):
     filters: Optional[AuditLogFilters] = None
 
 
@@ -35,4 +32,3 @@ class AuditLogItem(BaseModel):
     module: str
     action: str
     details: str
-

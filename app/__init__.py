@@ -24,5 +24,7 @@ def create_app():
     app.register_blueprint(notification_bp, url_prefix="/notifications")
     from app.module.table.table_routes import table_bp
     app.register_blueprint(table_bp, url_prefix="/tables")
+    from app.module.permission.permission_routes import permission_bp
+    app.register_blueprint(permission_bp, url_prefix="/permissions")
 
     return app

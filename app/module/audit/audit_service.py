@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 from app.shared.repository import AuditLog, User
-from app.shared.schemas.audit_schema import AuditLogRequest, TableQuery, AuditLogItem
+from app.shared.schemas.audit_schema import AuditLogRequest, AuditLogFilters, AuditLogItem, AuditLogQuery
 from app.shared.schemas.pagination_schema import PaginatedResponse
 from app.core import db
 from app.shared.utils import pagination_utils
@@ -26,7 +26,7 @@ def create_log(req: AuditLogRequest, ip=str):
     return {"message": "logged"}, 201
 
 
-def get_logs(query: TableQuery):
+def get_logs(query: AuditLogQuery):
     q = db.session.query(AuditLog, User.username).outerjoin(User, AuditLog.user_id == User.user_id)
 
     # Search
@@ -69,7 +69,7 @@ def get_logs(query: TableQuery):
 # Helper functions for get_logs
 # ============================================================
 
-def apply_audit_filters(q, filters):
+def apply_audit_filters(q, filters: AuditLogFilters | None):
     if not filters:
         return q
     if filters.module:
