@@ -1,8 +1,7 @@
-from datetime import datetime
 from sqlalchemy import Column, Integer, DateTime, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from ..extensions import db
-from ..utils.time import now_utc8
+from ..utils.time import now_utc0
 
 
 class UserPermission(db.Model):
@@ -15,7 +14,7 @@ class UserPermission(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey('py_mgmt_test.user.user_id'), nullable=False)
     permission_id = Column(Integer, ForeignKey('py_mgmt_test.permission.permission_id'), nullable=False)
-    created_at = Column(DateTime, nullable=False, default=now_utc8)
+    created_at = Column(DateTime, nullable=False, default=now_utc0)
 
     user = relationship('User', back_populates='permissions')
     permission = relationship('Permission', back_populates='users')

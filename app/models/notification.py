@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from ..extensions import db
-from ..utils.time import now_utc8
+from ..utils.time import now_utc0
 
 
 class Notification(db.Model):
@@ -12,6 +12,6 @@ class Notification(db.Model):
     user_id = Column(Integer, ForeignKey('py_mgmt_test.user.user_id'), nullable=False)
     message = Column(String(500), nullable=False)
     is_read = Column(Boolean, nullable=True, default=False)
-    created_at = Column(DateTime, nullable=False, default=now_utc8)
+    created_at = Column(DateTime, nullable=False, default=now_utc0)
 
     user = relationship('User', back_populates='notifications')
