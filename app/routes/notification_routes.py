@@ -3,22 +3,22 @@ from collections.abc import Generator
 from queue import Empty
 
 from flask import Blueprint, Response, jsonify, stream_with_context
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required
 from flask_pydantic import validate
 
 from ..schemas.notification_schema import MockApproveRequest, NotificationListQuery
 from ..services import notification_service
 from ..services.notification_stream import notification_hub
+from ..utils import auth as auth_utils
 
 notification_bp = Blueprint("notification", __name__)
-
 
 @notification_bp.get("")
 @jwt_required()
 @validate()
 def get_my_notifications(query: NotificationListQuery):
     result, status = notification_service.list_notifications_paginated(
-        user_id=get_jwt_identity(),
+        user_id=auth_utils.current_user_id(),
         page=query.page,
         page_size=query.pageSize,
     )
@@ -29,7 +29,7 @@ def get_my_notifications(query: NotificationListQuery):
 @jwt_required()
 @validate()
 def mark_notification_as_read(notification_id: int):
-    result, status = notification_service.mark_as_read(notification_id, get_jwt_identity())
+    result, status = notification_service.mark_as_read(notification_id, auth_utils.current_user_id())
     return jsonify(result), status
 
 
@@ -37,7 +37,7 @@ def mark_notification_as_read(notification_id: int):
 @jwt_required()
 @validate()
 def mark_all_notifications_as_read():
-    result, status = notification_service.mark_all_as_read(get_jwt_identity())
+    result, status = notification_service.mark_all_as_read(auth_utils.current_user_id())
     return jsonify(result), status
 
 
@@ -45,7 +45,7 @@ def mark_all_notifications_as_read():
 @jwt_required()
 @validate()
 def get_unread_count():
-    result, status = notification_service.get_unread_count(get_jwt_identity())
+    result, status = notification_service.get_unread_count(auth_utils.current_user_id())
     return jsonify(result), status
 
 
@@ -53,7 +53,7 @@ def get_unread_count():
 @jwt_required()
 @validate()
 def stream_notifications():
-    user_id = get_jwt_identity()
+    user_id = auth_utils.current_user_id()
 
     connection_id, event_queue = notification_hub.subscribe(user_id)
     print(
@@ -97,7 +97,7 @@ def stream_notifications():
 @jwt_required()
 @validate()
 def mock_approve(body: MockApproveRequest):
-    approver_user_id = get_jwt_identity()
+    approver_user_id = auth_utils.current_user_id()
 
     item_label = body.itemId if body.itemId is not None else "N/A"
     message = f"Item {item_label} was approved by user {approver_user_id}."
