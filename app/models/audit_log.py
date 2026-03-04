@@ -1,6 +1,6 @@
-from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime, Text
 from ..extensions import db
+from ..utils.time import now_utc8
 
 
 class AuditLog(db.Model):
@@ -11,7 +11,7 @@ class AuditLog(db.Model):
     user_id = Column(Integer, nullable=False)
     ip = Column(String(45))
     device = Column(String(255))
-    created_time = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, nullable=False, default=now_utc8)
     module = Column(String(100))
     action = Column(String(100))
     details = Column(Text)

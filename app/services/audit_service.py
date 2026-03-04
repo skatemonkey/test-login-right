@@ -6,6 +6,7 @@ from ..schemas.audit_schema import AuditLogRequest, TableQuery, AuditLogItem, Pa
 from .. import db
 from ..utils import pagination_utils
 
+
 def create_log(req: AuditLogRequest, ip=str):
     details = req.details
     if isinstance(details, dict):
@@ -47,7 +48,7 @@ def get_logs(query: TableQuery):
         'action': AuditLog.action
     }
     q = pagination_utils.apply_sorting(q, query.sortField or 'createdAt', query.sortOrder or 'desc', field_map,
-                                      AuditLog.created_time)
+                                       AuditLog.created_time)
 
     # Paginate
     results, total, total_pages = pagination_utils.paginate(q, query.page, query.pageSize)
