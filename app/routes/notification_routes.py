@@ -14,7 +14,7 @@ from ..utils.auth_utils import resolve_current_user_id
 notification_bp = Blueprint("notification", __name__)
 
 
-@notification_bp.route("", methods=["GET"])
+@notification_bp.get("")
 @jwt_required()
 @validate()
 def get_my_notifications(query: NotificationListQuery):
@@ -30,7 +30,7 @@ def get_my_notifications(query: NotificationListQuery):
     return jsonify(result.model_dump()), status
 
 
-@notification_bp.route("/<int:notification_id>/read", methods=["PATCH"])
+@notification_bp.patch("/<int:notification_id>/read")
 @jwt_required()
 @validate()
 def mark_notification_as_read(notification_id: int):
@@ -42,7 +42,7 @@ def mark_notification_as_read(notification_id: int):
     return jsonify(result), status
 
 
-@notification_bp.route("/read-all", methods=["PATCH"])
+@notification_bp.patch("/read-all")
 @jwt_required()
 @validate()
 def mark_all_notifications_as_read():
@@ -54,7 +54,7 @@ def mark_all_notifications_as_read():
     return jsonify(result), status
 
 
-@notification_bp.route("/unread-count/<int:user_id>", methods=["GET"])
+@notification_bp.get("/unread-count/<int:user_id>")
 @jwt_required()
 @validate()
 def get_unread_count(user_id: int):
@@ -68,7 +68,7 @@ def get_unread_count(user_id: int):
     return jsonify(result), status
 
 
-@notification_bp.route("/stream", methods=["GET"])
+@notification_bp.get("/stream")
 @jwt_required()
 @validate()
 def stream_notifications():
@@ -114,7 +114,7 @@ def stream_notifications():
     return response
 
 
-@notification_bp.route("/mock-approve", methods=["POST"])
+@notification_bp.post("/mock-approve")
 @jwt_required()
 @validate()
 def mock_approve(body: MockApproveRequest):
