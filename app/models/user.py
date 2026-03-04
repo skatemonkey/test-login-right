@@ -1,23 +1,39 @@
-from datetime import timezone, timedelta
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
-from sqlalchemy.orm import relationship
+from datetime import datetime
+from typing import TYPE_CHECKING
+
+from sqlalchemy import Boolean, DateTime, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from ..extensions import db
 from ..utils.time import now_utc0
 
-UTC8 = timezone(timedelta(hours=8))
+if TYPE_CHECKING:
+    from .notification import Notification
+    from .user_permission import UserPermission
 
 
 class User(db.Model):
     __tablename__ = 'user'
     __table_args__ = {'schema': 'py_mgmt_test'}
 
-    user_id = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(String(50), unique=True, nullable=False)
-    email = Column(String(100), nullable=False)
-    password_hash = Column(String(255), nullable=False)
-    is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, nullable=False, default=now_utc0)
-    updated_at = Column(DateTime, nullable=False, default=now_utc0, onupdate=now_utc0)
+    user_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    username: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(String(100), nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=now_utc0)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        default=now_utc0,
+        onupdate=now_utc0,
+    )
 
-    permissions = relationship('UserPermission', back_populates='user', cascade='all, delete-orphan')
-    notifications = relationship('Notification', back_populates='user', cascade='all, delete-orphan')
+    permissions: Mapped[list["UserPermission"]] = relationship(
+        back_populates='user',
+        cascade='all, delete-orphan',
+    )
+    notifications: Mapped[list["Notification"]] = relationship(
+        back_populates='user',
+        cascade='all, delete-orphan',
+    )

@@ -1,5 +1,7 @@
 from typing import Any
 
+from sqlalchemy import update
+
 from .. import db
 from ..models.notification import Notification
 from ..schemas.notification_schema import NotificationItem
@@ -55,12 +57,6 @@ def list_notifications_paginated(
         .all()
     )
 
-    # unread_count = (
-    #     Notification.query
-    #     .filter(Notification.user_id == user_id, Notification.is_read.is_(False))
-    #     .count()
-    # )
-
     return NotificationPagination[NotificationItem](
         data=[_to_notification_payload(item) for item in notifications],
         page=page,
@@ -68,7 +64,6 @@ def list_notifications_paginated(
         totalElements=total_elements,
         totalPages=total_pages,
         hasMore=page < total_pages,
-        # unreadCount=unread_count,
     ), 200
 
 
@@ -95,19 +90,21 @@ def mark_as_read(notification_id: int, user_id: int) -> tuple[dict[str, Any], in
 
 
 def mark_all_as_read(user_id: int) -> tuple[dict[str, Any], int]:
-    unread_notifications = (
-        Notification.query
-        .filter(Notification.user_id == user_id, Notification.is_read.is_(False))
-        .all()
+    stmt = (
+        update(Notification)
+        .where(
+            Notification.user_id == user_id,
+            Notification.is_read.is_(False),
+        )
+        .values(is_read=True)
     )
+    result = db.session.execute(stmt)
+    updated_count = int(result.rowcount or 0)
 
-    for notification in unread_notifications:
-        notification.is_read = True
-
-    if unread_notifications:
+    if updated_count > 0:
         db.session.commit()
 
-    return {"message": "All notifications marked as read", "updatedCount": len(unread_notifications)}, 200
+    return {"message": "All notifications marked as read", "updatedCount": updated_count}, 200
 
 
 def _to_notification_payload(notification: Notification) -> dict[str, Any]:

@@ -1,7 +1,14 @@
-from sqlalchemy import Column, Integer, String, DateTime, UniqueConstraint
-from sqlalchemy.orm import relationship
+from datetime import datetime
+from typing import TYPE_CHECKING
+
+from sqlalchemy import DateTime, String, UniqueConstraint
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from ..extensions import db
 from ..utils.time import now_utc0
+
+if TYPE_CHECKING:
+    from .user_permission import UserPermission
 
 
 class Permission(db.Model):
@@ -11,10 +18,13 @@ class Permission(db.Model):
         {'schema': 'py_mgmt_test'}
     )
 
-    permission_id = Column(Integer, primary_key=True, autoincrement=True)
-    module = Column(String(50), nullable=False)
-    action = Column(String(30), nullable=False)
-    description = Column(String(100))
-    created_at = Column(DateTime, nullable=False, default=now_utc0)
+    permission_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    module: Mapped[str] = mapped_column(String(50), nullable=False)
+    action: Mapped[str] = mapped_column(String(30), nullable=False)
+    description: Mapped[str | None] = mapped_column(String(100))
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=now_utc0)
 
-    users = relationship('UserPermission', back_populates='permission', cascade='all, delete-orphan')
+    users: Mapped[list["UserPermission"]] = relationship(
+        back_populates='permission',
+        cascade='all, delete-orphan',
+    )

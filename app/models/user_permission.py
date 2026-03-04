@@ -1,7 +1,15 @@
-from sqlalchemy import Column, Integer, DateTime, ForeignKey, UniqueConstraint
-from sqlalchemy.orm import relationship
+from datetime import datetime
+from typing import TYPE_CHECKING
+
+from sqlalchemy import DateTime, ForeignKey, UniqueConstraint
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from ..extensions import db
 from ..utils.time import now_utc0
+
+if TYPE_CHECKING:
+    from .permission import Permission
+    from .user import User
 
 
 class UserPermission(db.Model):
@@ -11,10 +19,10 @@ class UserPermission(db.Model):
         {'schema': 'py_mgmt_test'}
     )
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey('py_mgmt_test.user.user_id'), nullable=False)
-    permission_id = Column(Integer, ForeignKey('py_mgmt_test.permission.permission_id'), nullable=False)
-    created_at = Column(DateTime, nullable=False, default=now_utc0)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('py_mgmt_test.user.user_id'), nullable=False)
+    permission_id: Mapped[int] = mapped_column(ForeignKey('py_mgmt_test.permission.permission_id'), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=now_utc0)
 
-    user = relationship('User', back_populates='permissions')
-    permission = relationship('Permission', back_populates='users')
+    user: Mapped["User"] = relationship(back_populates='permissions')
+    permission: Mapped["Permission"] = relationship(back_populates='users')
