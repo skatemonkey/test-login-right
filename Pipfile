@@ -1,0 +1,19 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+flask = "*"
+flask-jwt-extended = "*"
+flask-cors = "*"
+flask-sqlalchemy = "*"
+pymysql = "*"
+requests = "*"
+pydantic = "*"
+flask-pydantic = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.13"
