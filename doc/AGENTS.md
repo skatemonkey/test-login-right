@@ -14,6 +14,25 @@ Use this map first and jump directly to listed files; avoid full codebase rescan
 7. SQLAlchemy models are in schema `py_mgmt_test`; keep `__table_args__` schema + constraints consistent when adding models.
 8. Prefer namespace-style imports for shared/internal modules and call methods via that namespace so usage is explicit (for example `from app.shared.utils import auth as auth_utils` then `auth_utils.current_user_id()`, or `from app.shared.utils import pagination_utils` then `pagination_utils.paginate(...)`).
 
+## Import Conventions
+1. Use absolute internal imports only (`from app...`); do not use relative imports (`from .` / `from ..`).
+2. Import behavior modules (services, utils, stream/event modules) using namespace style and call through that namespace.
+3. Types/entities (schemas, ORM models, dataclasses) can be imported as direct symbols from concrete module files.
+4. Keep import groups in this order: standard library, third-party, first-party (`app`), with one blank line between groups.
+5. Function-local imports are allowed only when required for circular/deferred loading (for example blueprint imports inside `app/__init__.py::create_app`).
+
+## Engineering Standards
+Use PEP 8 conventions for Python code:
+
+- Variables / functions / methods: `snake_case`
+  Example: `user_id`, `get_user_by_id()`
+- Classes (including ORM models): `PascalCase` (CapWords)
+  Example: `User`, `UserPermission`, `AuditLog`
+- Constants: `UPPER_SNAKE_CASE`
+  Example: `MAX_RETRY_COUNT`
+- Modules/files/packages: `snake_case`
+  Example: `user_service.py`
+
 ## Project Entry Points
 - `app.py`
 - `app/__init__.py`
