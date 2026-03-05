@@ -5,7 +5,9 @@ from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash
 
 from app.core import db
-from app.shared.repository import Permission, User, UserPermission
+from app.shared.repository.permission import Permission
+from app.shared.repository.user import User
+from app.shared.repository.user_permission import UserPermission
 from app.shared.schemas.pagination_schema import PaginatedResponse
 from app.shared.schemas.user_schema import (
     PermissionMatrixItem,

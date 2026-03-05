@@ -1,6 +1,8 @@
 # utils/pagination.py
 import math
+
 from sqlalchemy import or_
+
 
 def apply_search(query, search_term, fields):
     """Apply search across multiple fields"""

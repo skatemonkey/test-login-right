@@ -1,6 +1,6 @@
+from queue import Full, Queue
 import threading
 import uuid
-from queue import Full, Queue
 
 
 class NotificationStreamHub:

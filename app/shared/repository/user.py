@@ -5,11 +5,11 @@ from sqlalchemy import Boolean, DateTime, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core import db
-from app.shared.utils.time import now_utc0
+from app.shared.utils import time as time_utils
 
 if TYPE_CHECKING:
     from app.shared.repository.notification import Notification
-    from .user_permission import UserPermission
+    from app.shared.repository.user_permission import UserPermission
 
 
 class User(db.Model):
@@ -21,12 +21,12 @@ class User(db.Model):
     email: Mapped[str] = mapped_column(String(100), nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=now_utc0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=time_utils.now_utc0)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime,
         nullable=False,
-        default=now_utc0,
-        onupdate=now_utc0,
+        default=time_utils.now_utc0,
+        onupdate=time_utils.now_utc0,
     )
 
     permissions: Mapped[list["UserPermission"]] = relationship(

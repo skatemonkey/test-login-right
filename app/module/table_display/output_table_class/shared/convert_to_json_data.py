@@ -1,10 +1,9 @@
+from dataclasses import asdict
 import pickle
 import traceback
-from dataclasses import asdict
 
-from ...schema.table_schema import CellDataConfig, TableDataConfig
-from .style_resolver import get_style
-from .value_format_resolver import get_value
+from app.module.table_display.output_table_class.shared import style_resolver, value_format_resolver
+from app.module.table_display.schema.table_schema import CellDataConfig, TableDataConfig
 
 
 def convert_to_json_data(self):
@@ -24,13 +23,13 @@ def convert_to_json_data(self):
             CellDataConfig(
                 row=0,
                 col=col_idx,
-                value=get_value(
+                value=value_format_resolver.get_value(
                     value_format_settings=value_format_settings,
                     row=0,
                     col=col_idx,
                     value=self.column_names.get(col_name, col_name)
                 ),
-                style=get_style(
+                style=style_resolver.get_style(
                     style_settings=style_settings,
                     row=0,
                     col=col_idx,
@@ -47,13 +46,13 @@ def convert_to_json_data(self):
                 CellDataConfig(
                     row=data_row_idx + 1,
                     col=col_idx,
-                    value=get_value(
+                    value=value_format_resolver.get_value(
                         value_format_settings=value_format_settings,
                         row=data_row_idx + 1,
                         col=col_idx,
                         value=data[col_name][data_row_idx]
                     ),
-                    style=get_style(
+                    style=style_resolver.get_style(
                         style_settings=style_settings,
                         row=data_row_idx + 1,
                         col=col_idx,

@@ -1,4 +1,4 @@
-from ...schema.table_schema import TableLayoutConfig, CellLayoutConfig
+from app.module.table_display.schema.table_schema import CellLayoutConfig, TableLayoutConfig
 
 
 class OutputTable3:
@@ -21,5 +21,5 @@ class OutputTable3:
             col_count=4
         )
 
-    from ..shared.convert_to_json_layout_3 import convert_to_json_layout
-    from ..shared.convert_to_json_data_3 import convert_to_json_data
+    from app.module.table_display.output_table_class.shared.convert_to_json_data_3 import convert_to_json_data
+    from app.module.table_display.output_table_class.shared.convert_to_json_layout_3 import convert_to_json_layout

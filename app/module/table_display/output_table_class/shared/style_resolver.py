@@ -1,4 +1,4 @@
-from .style_functions import STYLE_FUNCTIONS
+from app.module.table_display.output_table_class.shared.style_functions import STYLE_FUNCTIONS
 
 
 def _default_style(style_settings):

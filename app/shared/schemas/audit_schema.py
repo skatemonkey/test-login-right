@@ -1,6 +1,7 @@
 from typing import Optional, Union
 
 from pydantic import BaseModel
+
 from app.shared.schemas.pagination_schema import TableQueryBase
 
 

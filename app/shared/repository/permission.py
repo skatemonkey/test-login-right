@@ -5,10 +5,10 @@ from sqlalchemy import Boolean, DateTime, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core import db
-from app.shared.utils.time import now_utc0
+from app.shared.utils import time as time_utils
 
 if TYPE_CHECKING:
-    from .user_permission import UserPermission
+    from app.shared.repository.user_permission import UserPermission
 
 
 class Permission(db.Model):
@@ -23,12 +23,12 @@ class Permission(db.Model):
     action: Mapped[str] = mapped_column(String(30), nullable=False)
     description: Mapped[str | None] = mapped_column(String(100))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=now_utc0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=time_utils.now_utc0)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime,
         nullable=False,
-        default=now_utc0,
-        onupdate=now_utc0,
+        default=time_utils.now_utc0,
+        onupdate=time_utils.now_utc0,
     )
 
     users: Mapped[list["UserPermission"]] = relationship(

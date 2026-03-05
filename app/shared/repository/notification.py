@@ -5,7 +5,7 @@ from sqlalchemy import Boolean, DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core import db
-from app.shared.utils.time import now_utc0
+from app.shared.utils import time as time_utils
 
 if TYPE_CHECKING:
     from app.shared.repository.user import User
@@ -19,6 +19,6 @@ class Notification(db.Model):
     user_id: Mapped[int] = mapped_column(ForeignKey('py_mgmt_test.user.user_id'), nullable=False)
     message: Mapped[str] = mapped_column(String(500), nullable=False)
     is_read: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=now_utc0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=time_utils.now_utc0)
 
     user: Mapped["User"] = relationship(back_populates='notifications')

@@ -1,6 +1,7 @@
-import requests
 from datetime import timedelta
 from urllib.parse import quote_plus
+
+import requests
 
 
 def _get_db3_uri():

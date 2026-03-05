@@ -1,6 +1,7 @@
 # table_models.py
 from dataclasses import dataclass, field
 
+
 @dataclass
 class CellLayoutConfig:
     row: int

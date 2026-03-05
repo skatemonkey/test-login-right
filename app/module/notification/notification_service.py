@@ -3,10 +3,10 @@ from typing import Any
 from sqlalchemy import update
 
 from app.core import db
-from app.shared.repository import Notification
+from app.module.notification import notification_stream
+from app.shared.repository.notification import Notification
 from app.shared.schemas.notification_schema import NotificationItem
 from app.shared.schemas.pagination_schema import NotificationPagination
-from app.module.notification.notification_stream import notification_hub
 
 
 def create_notification(user_id: int, message: str) -> tuple[dict[str, Any], int]:
@@ -19,7 +19,7 @@ def create_notification(user_id: int, message: str) -> tuple[dict[str, Any], int
         f"[NOTI][create] notification_id={notification.id} user_id={user_id} message={message}",
         flush=True,
     )
-    notification_hub.publish(user_id, {"type": "notification.created", "notification": payload})
+    notification_stream.notification_hub.publish(user_id, {"type": "notification.created", "notification": payload})
 
     return {"message": "Notification sent", "notification": payload}, 201
 

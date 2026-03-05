@@ -1,5 +1,6 @@
 from dataclasses import asdict
 
+
 def convert_to_json_layout(self):
     try:
         # Convert dataclass to dict

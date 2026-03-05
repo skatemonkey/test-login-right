@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+
 from app.shared.schemas.pagination_schema import TableQueryBase
 
 

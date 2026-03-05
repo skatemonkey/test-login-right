@@ -1,14 +1,13 @@
-import json
 from collections.abc import Generator
+import json
 from queue import Empty
 
 from flask import Blueprint, Response, jsonify, stream_with_context
 from flask_jwt_extended import jwt_required
 from flask_pydantic import validate
 
+from app.module.notification import notification_service, notification_stream
 from app.shared.schemas.notification_schema import MockApproveRequest, NotificationListQuery
-from app.module.notification import notification_service
-from app.module.notification.notification_stream import notification_hub
 from app.shared.utils import auth as auth_utils
 
 notification_bp = Blueprint("notification", __name__)
@@ -55,7 +54,7 @@ def get_unread_count():
 def stream_notifications():
     user_id = auth_utils.current_user_id()
 
-    connection_id, event_queue = notification_hub.subscribe(user_id)
+    connection_id, event_queue = notification_stream.notification_hub.subscribe(user_id)
     print(
         f"[SSE][stream-open] user_id={user_id} connection_id={connection_id}",
         flush=True,
@@ -80,7 +79,7 @@ def stream_notifications():
                     )
                     yield ": ping\n\n"
         finally:
-            notification_hub.unsubscribe(user_id, connection_id)
+            notification_stream.notification_hub.unsubscribe(user_id, connection_id)
             print(
                 f"[SSE][stream-close] user_id={user_id} connection_id={connection_id}",
                 flush=True,

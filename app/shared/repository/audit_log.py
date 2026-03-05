@@ -4,7 +4,7 @@ from sqlalchemy import DateTime, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core import db
-from app.shared.utils.time import now_utc0
+from app.shared.utils import time as time_utils
 
 
 class AuditLog(db.Model):
@@ -15,7 +15,7 @@ class AuditLog(db.Model):
     user_id: Mapped[int] = mapped_column(nullable=False)
     ip: Mapped[str | None] = mapped_column(String(45))
     device: Mapped[str | None] = mapped_column(String(255))
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=now_utc0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=time_utils.now_utc0)
     module: Mapped[str | None] = mapped_column(String(100))
     action: Mapped[str | None] = mapped_column(String(100))
     details: Mapped[str | None] = mapped_column(Text)

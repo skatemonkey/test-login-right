@@ -1,6 +1,6 @@
 import pickle
-import time
 import random
+import time
 
 # Initial data
 table_data: dict[str, list] = {
