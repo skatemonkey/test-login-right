@@ -28,13 +28,13 @@ def convert_to_json_data(self):
                     value_format_settings=value_format_settings,
                     row=0,
                     col=col_idx,
-                    value=self.columnNames.get(col_name, col_name)
+                    value=self.column_names.get(col_name, col_name)
                 ),
                 style=get_style(
                     style_settings=style_settings,
                     row=0,
                     col=col_idx,
-                    value=self.columnNames.get(col_name, col_name)
+                    value=self.column_names.get(col_name, col_name)
                 )
             )
             for col_idx, col_name in enumerate(columns)
@@ -65,9 +65,9 @@ def convert_to_json_data(self):
             cell_data.append(data_row)
 
         table_config = TableDataConfig(
-            cellData=cell_data,
-            rowCount=len(cell_data),
-            colCount=len(columns)
+            cell_data=cell_data,
+            row_count=len(cell_data),
+            col_count=len(columns)
         )
 
         return asdict(table_config)

@@ -2,16 +2,16 @@ class OutputTable1:
     def __init__(self, ):
         super().__init__()
         self.pickle_path = "/Users/user/hub/dev/test/output/table_1.pkl"
-        self.tableSn = 1
-        self.columnNames = {
+        self.table_sn = 1
+        self.column_names = {
             "instrument": "交易品种",
-            "bboSpread": "CW Spread(个ticker)",
-            "midPriceSpread": "CW中间价-BN中间价的绝对值(个ticker)",
+            "bbo_spread": "CW Spread(个ticker)",
+            "mid_price_spread": "CW中间价-BN中间价的绝对值(个ticker)",
 
         }
-        self.totalTableTitleRows = 1
-        self.columnDisplayOrder = ("交易品种", "CW Spread(个ticker)", "CW中间价-BN中间价的绝对值(个ticker)",)
-        self.tableTitle = "做市品种Spread监控"
+        self.total_table_title_rows = 1
+        self.column_display_order = ("交易品种", "CW Spread(个ticker)", "CW中间价-BN中间价的绝对值(个ticker)",)
+        self.table_title = "做市品种Spread监控"
         self.style_settings = {
             "default": 2,
             "row": {0: 1},

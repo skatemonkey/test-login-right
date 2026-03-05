@@ -13,7 +13,7 @@ def create_log(req: AuditLogRequest, ip=str):
         details = json.dumps(details)
 
     log = AuditLog(
-        user_id=req.userId,
+        user_id=req.user_id,
         ip=ip,
         module=req.module,
         action=req.action,
@@ -43,15 +43,15 @@ def get_logs(query: AuditLogQuery):
         'username': User.username,
         'ip': AuditLog.ip,
         'device': AuditLog.device,
-        'createdAt': AuditLog.created_at,
+        'created_at': AuditLog.created_at,
         'module': AuditLog.module,
         'action': AuditLog.action
     }
-    q = pagination_utils.apply_sorting(q, query.sortField or 'createdAt', query.sortOrder or 'desc', field_map,
+    q = pagination_utils.apply_sorting(q, query.sort_field or 'created_at', query.sort_order or 'desc', field_map,
                                        AuditLog.created_at)
 
     # Paginate
-    results, total, total_pages = pagination_utils.paginate(q, query.page, query.pageSize)
+    results, total, total_pages = pagination_utils.paginate(q, query.page, query.page_size)
 
     # Map
     data = [map_audit_log(log, username) for log, username in results]
@@ -59,9 +59,9 @@ def get_logs(query: AuditLogQuery):
     return PaginatedResponse[AuditLogItem](
         data=data,
         page=query.page,
-        pageSize=query.pageSize,
-        totalElements=total,
-        totalPages=total_pages
+        page_size=query.page_size,
+        total_elements=total,
+        total_pages=total_pages
     ), 200
 
 
@@ -76,11 +76,11 @@ def apply_audit_filters(q, filters: AuditLogFilters | None):
         q = q.filter(AuditLog.module == filters.module)
     if filters.action:
         q = q.filter(AuditLog.action == filters.action)
-    if filters.dateFrom:
-        date_from = datetime.strptime(filters.dateFrom, '%Y-%m-%d %H:%M:%S')
+    if filters.date_from:
+        date_from = datetime.strptime(filters.date_from, '%Y-%m-%d %H:%M:%S')
         q = q.filter(AuditLog.created_at >= date_from)
-    if filters.dateTo:
-        date_to = datetime.strptime(filters.dateTo, '%Y-%m-%d %H:%M:%S')
+    if filters.date_to:
+        date_to = datetime.strptime(filters.date_to, '%Y-%m-%d %H:%M:%S')
         q = q.filter(AuditLog.created_at <= date_to)
     return q
 
@@ -91,7 +91,7 @@ def map_audit_log(log, username):
         username=username,
         ip=log.ip or '',
         device=log.device or '',
-        createdAt=log.created_at.strftime('%Y-%m-%d %H:%M:%S') if log.created_at else '',
+        created_at=log.created_at.strftime('%Y-%m-%d %H:%M:%S') if log.created_at else '',
         module=log.module or '',
         action=log.action or '',
         details=log.details or ''

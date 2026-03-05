@@ -1,7 +1,7 @@
-from .outputTableClass.outputTable1Class import OutputTable1
-from .outputTableClass.outputTable2Class import OutputTable2
-from .outputTableClass.outputTable3Class import OutputTable3
-from .outputTableClass.outputTable4Class import OutputTable4
+from .output_table_class.output_table_1_class import OutputTable1
+from .output_table_class.output_table_2_class import OutputTable2
+from .output_table_class.output_table_3_class import OutputTable3
+from .output_table_class.output_table_4_class import OutputTable4
 
 TABLE_CLASSES = {
     1: OutputTable1,

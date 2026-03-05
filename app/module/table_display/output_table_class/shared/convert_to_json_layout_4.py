@@ -37,23 +37,23 @@ def convert_to_json_layout(self):
 
             model_start, model_span = row["model_span"]
             if r == model_start:
-                layout_row.append(CellLayoutConfig(r, 0, rowSpan=model_span))
+                layout_row.append(CellLayoutConfig(r, 0, row_span=model_span))
 
             feature_start, feature_span = row["feature_span"]
             if r == feature_start:
-                layout_row.append(CellLayoutConfig(r, 1, rowSpan=feature_span))
+                layout_row.append(CellLayoutConfig(r, 1, row_span=feature_span))
 
             layout_row.append(CellLayoutConfig(r, 2))
 
             if r == feature_start:
-                layout_row.append(CellLayoutConfig(r, 3, rowSpan=feature_span))
+                layout_row.append(CellLayoutConfig(r, 3, row_span=feature_span))
 
             cell_layout.append(layout_row)
 
         table_layout = TableLayoutConfig(
-            cellLayout=cell_layout,
-            rowCount=row_count,
-            colCount=col_count
+            cell_layout=cell_layout,
+            row_count=row_count,
+            col_count=col_count
         )
 
         return asdict(table_layout)

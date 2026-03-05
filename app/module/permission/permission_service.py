@@ -26,19 +26,19 @@ def get_permissions(query: PermissionListQuery):
 
     # Sort
     field_map = {
-        'permissionId': Permission.permission_id,
+        'permission_id': Permission.permission_id,
         'module': Permission.module,
         'action': Permission.action,
         'description': Permission.description,
-        'isActive': Permission.is_active,
-        'createdAt': Permission.created_at,
-        'updatedAt': Permission.updated_at
+        'is_active': Permission.is_active,
+        'created_at': Permission.created_at,
+        'updated_at': Permission.updated_at
     }
-    q = pagination_utils.apply_sorting(q, query.sortField or 'updatedAt', query.sortOrder or 'desc', field_map,
+    q = pagination_utils.apply_sorting(q, query.sort_field or 'updated_at', query.sort_order or 'desc', field_map,
                                        Permission.updated_at)
 
     # Paginate
-    results, total, total_pages = pagination_utils.paginate(q, query.page, query.pageSize)
+    results, total, total_pages = pagination_utils.paginate(q, query.page, query.page_size)
 
     # Map
     data = [map_permission(permission) for permission in results]
@@ -46,9 +46,9 @@ def get_permissions(query: PermissionListQuery):
     return PaginatedResponse[PermissionItem](
         data=data,
         page=query.page,
-        pageSize=query.pageSize,
-        totalElements=total,
-        totalPages=total_pages
+        page_size=query.page_size,
+        total_elements=total,
+        total_pages=total_pages
     ), 200
 
 
@@ -63,20 +63,20 @@ def apply_permission_filters(q, filters: PermissionFilters | None):
         q = q.filter(Permission.module == filters.module)
     if filters.action:
         q = q.filter(Permission.action == filters.action)
-    if filters.isActive is not None:
-        q = q.filter(Permission.is_active == filters.isActive)
+    if filters.is_active is not None:
+        q = q.filter(Permission.is_active == filters.is_active)
     return q
 
 
 def map_permission(permission):
     return PermissionItem(
-        permissionId=permission.permission_id,
+        permission_id=permission.permission_id,
         module=permission.module or '',
         action=permission.action or '',
         description=permission.description,
-        isActive=bool(permission.is_active),
-        createdAt=permission.created_at.strftime('%Y-%m-%d %H:%M:%S') if permission.created_at else '',
-        updatedAt=permission.updated_at.strftime('%Y-%m-%d %H:%M:%S') if permission.updated_at else ''
+        is_active=bool(permission.is_active),
+        created_at=permission.created_at.strftime('%Y-%m-%d %H:%M:%S') if permission.created_at else '',
+        updated_at=permission.updated_at.strftime('%Y-%m-%d %H:%M:%S') if permission.updated_at else ''
     )
 
 
@@ -95,7 +95,7 @@ def create_permission(body: PermissionCreateRequest):
         module=module,
         action=action,
         description=description,
-        is_active=body.isActive,
+        is_active=body.is_active,
     )
 
     try:
@@ -138,7 +138,7 @@ def update_permission(permission_id: int, body: PermissionUpdateRequest):
     permission.module = module
     permission.action = action
     permission.description = description
-    permission.is_active = body.isActive
+    permission.is_active = body.is_active
 
     try:
         db.session.commit()

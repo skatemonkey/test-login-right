@@ -4,7 +4,7 @@ from app.shared.schemas.pagination_schema import TableQueryBase
 
 
 class UserFilters(BaseModel):
-    isActive: bool | None = None
+    is_active: bool | None = None
 
 
 class UserListQuery(TableQueryBase):
@@ -12,37 +12,37 @@ class UserListQuery(TableQueryBase):
 
 
 class UserListItem(BaseModel):
-    userId: int
+    user_id: int
     username: str
     email: str
-    isActive: bool
-    permissionCount: int
-    createdAt: str
-    updatedAt: str
+    is_active: bool
+    permission_count: int
+    created_at: str
+    updated_at: str
 
 
 class UserDetail(BaseModel):
-    userId: int
+    user_id: int
     username: str
     email: str
-    isActive: bool
-    permissionIds: list[int]
-    createdAt: str
-    updatedAt: str
+    is_active: bool
+    permission_ids: list[int]
+    created_at: str
+    updated_at: str
 
 
 class UserCreateRequest(BaseModel):
     username: str = Field(min_length=1, max_length=50)
     email: str = Field(min_length=3, max_length=100)
     password: str = Field(min_length=8, max_length=255)
-    isActive: bool = True
+    is_active: bool = True
 
 
 class UserUpdateRequest(BaseModel):
     username: str = Field(min_length=1, max_length=50)
     email: str = Field(min_length=3, max_length=100)
     password: str | None = Field(default=None, max_length=255)
-    isActive: bool = True
+    is_active: bool = True
 
 
 class UserPermissionToggleRequest(BaseModel):
@@ -50,6 +50,6 @@ class UserPermissionToggleRequest(BaseModel):
 
 
 class PermissionMatrixItem(BaseModel):
-    permissionId: int
+    permission_id: int
     module: str
     action: str

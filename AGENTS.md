@@ -8,7 +8,7 @@ Use this map first and jump directly to listed files; avoid full codebase rescan
 1. Hierarchy: `core/` -> `module/` -> `shared/`. Keep business logic in `*-service.py`, not in route handlers.
 2. API flow standard: `routes` -> `schemas` -> `service` -> `repository` (and `db.session` only in service layer).
 3. Register every new blueprint in `app/__init__.py`; endpoint prefixes are owned there.
-4. Keep API payload field names camelCase to match frontend contracts (for example `pageSize`, `createdAt`, `isActive`).
+4. Keep API payload field names snake_case to match frontend contracts (for example `page_size`, `created_at`, `is_active`).
 5. Datetime output format should stay `%Y-%m-%d %H:%M:%S`; DB timestamp defaults use `app/shared/utils/time.py::now_utc0`.
 6. Protected endpoints use `@jwt_required()` and user identity should come from `app/shared/utils/auth.py::current_user_id()`.
 7. SQLAlchemy models are in schema `py_mgmt_test`; keep `__table_args__` schema + constraints consistent when adding models.
@@ -101,12 +101,12 @@ Use this map first and jump directly to listed files; avoid full codebase rescan
 - Key files:
   - `app/module/table_display/table_registry.py`
   - `app/module/table_display/schema/table_schema.py`
-  - `app/module/table_display/outputTableClass/outputTable1Class/__init__.py`
-  - `app/module/table_display/outputTableClass/outputTable2Class/__init__.py`
-  - `app/module/table_display/outputTableClass/outputTable3Class/__init__.py`
-  - `app/module/table_display/outputTableClass/outputTable4Class/__init__.py`
-  - `app/module/table_display/outputTableClass/shared/convert_to_json_layout.py`
-  - `app/module/table_display/outputTableClass/shared/convert_to_json_data.py`
+  - `app/module/table_display/output_table_class/output_table_1_class/__init__.py`
+  - `app/module/table_display/output_table_class/output_table_2_class/__init__.py`
+  - `app/module/table_display/output_table_class/output_table_3_class/__init__.py`
+  - `app/module/table_display/output_table_class/output_table_4_class/__init__.py`
+  - `app/module/table_display/output_table_class/shared/convert_to_json_layout.py`
+  - `app/module/table_display/output_table_class/shared/convert_to_json_data.py`
 
 ## Shared Layer Index (Where To Find Common Concerns)
 - ORM entities: `app/shared/repository/`
@@ -129,7 +129,7 @@ Use this map first and jump directly to listed files; avoid full codebase rescan
 - Change paginated list behavior -> target `*_service.py` + `app/shared/schemas/pagination_schema.py` + `app/shared/utils/pagination_utils.py`
 - Change permission matrix/assignable actions -> `app/module/user/user_service.py` (`ALLOWED_PERMISSION_ACTIONS`)
 - Change notification SSE flow -> `app/module/notification/notification_routes.py` + `notification_stream.py` + `notification_service.py`
-- Change table payload/layout generation -> `app/module/table_display/table_registry.py` + selected class in `outputTableClass/` + corresponding converter in `outputTableClass/shared/`
+- Change table payload/layout generation -> `app/module/table_display/table_registry.py` + selected class in `output_table_class/` + corresponding converter in `output_table_class/shared/`
 - Add/modify DB model -> `app/shared/repository/*.py` + service logic + schema mapping in related `app/shared/schemas/*.py`
 
 ## No-Rescan Workflow Rule

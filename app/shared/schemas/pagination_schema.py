@@ -7,20 +7,20 @@ T = TypeVar("T")
 
 class TableQueryBase(BaseModel):
     page: int = Field(default=1, ge=1)
-    pageSize: int = Field(default=10, ge=1)
-    sortField: str | None = None
-    sortOrder: Literal["asc", "desc"] | None = None
+    page_size: int = Field(default=10, ge=1)
+    sort_field: str | None = None
+    sort_order: Literal["asc", "desc"] | None = None
     search: str | None = None
 
 
 class PaginatedResponse(BaseModel, Generic[T]):
     data: List[T]
     page: int
-    pageSize: int
-    totalElements: int
-    totalPages: int
+    page_size: int
+    total_elements: int
+    total_pages: int
 
 
 class NotificationPagination(PaginatedResponse[T], Generic[T]):
-    hasMore: bool
-    # unreadCount: int
+    has_more: bool
+    # unread_count: int

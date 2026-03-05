@@ -5,14 +5,14 @@ from dataclasses import dataclass, field
 class CellLayoutConfig:
     row: int
     col: int
-    rowSpan: int = 1
-    colSpan: int = 1
+    row_span: int = 1
+    col_span: int = 1
 
 @dataclass
 class TableLayoutConfig:
-    cellLayout: list[list[CellLayoutConfig]] = field(default_factory=list)
-    rowCount: int = 0
-    colCount: int = 0
+    cell_layout: list[list[CellLayoutConfig]] = field(default_factory=list)
+    row_count: int = 0
+    col_count: int = 0
 
 
 
@@ -26,6 +26,6 @@ class CellDataConfig:
 
 @dataclass
 class TableDataConfig:
-    cellData: list[list[CellDataConfig]] = field(default_factory=list)
-    rowCount: int = 0
-    colCount: int = 0
+    cell_data: list[list[CellDataConfig]] = field(default_factory=list)
+    row_count: int = 0
+    col_count: int = 0

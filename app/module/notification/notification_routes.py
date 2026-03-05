@@ -20,7 +20,7 @@ def get_my_notifications(query: NotificationListQuery):
     result, status = notification_service.list_notifications_paginated(
         user_id=auth_utils.current_user_id(),
         page=query.page,
-        page_size=query.pageSize,
+        page_size=query.page_size,
     )
     return jsonify(result.model_dump()), status
 
@@ -99,18 +99,18 @@ def stream_notifications():
 def mock_approve(body: MockApproveRequest):
     approver_user_id = auth_utils.current_user_id()
 
-    item_label = body.itemId if body.itemId is not None else "N/A"
+    item_label = body.item_id if body.item_id is not None else "N/A"
     message = f"Item {item_label} was approved by user {approver_user_id}."
     created, status = notification_service.create_notification(
-        user_id=body.targetUserId,
+        user_id=body.target_user_id,
         message=message,
     )
 
     return jsonify({
         "message": "Approve action mocked and notification sent",
-        "approverUserId": approver_user_id,
-        "targetUserId": body.targetUserId,
-        "itemId": body.itemId,
+        "approver_user_id": approver_user_id,
+        "target_user_id": body.target_user_id,
+        "item_id": body.item_id,
         "notification": created["notification"],
     }), status
 
