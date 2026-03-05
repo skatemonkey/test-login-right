@@ -81,9 +81,9 @@ def map_permission(permission):
 
 
 def create_permission(body: PermissionCreateRequest):
-    module = normalize_text(body.module)
-    action = normalize_text(body.action)
-    description = normalize_optional_text(body.description)
+    module = body.module
+    action = body.action
+    description = body.description
 
     if not module or not action:
         return {"error": "Module and action are required"}, 400
@@ -116,9 +116,9 @@ def update_permission(permission_id: int, body: PermissionUpdateRequest):
     if not permission:
         return {"error": "Permission not found"}, 404
 
-    module = normalize_text(body.module)
-    action = normalize_text(body.action)
-    description = normalize_optional_text(body.description)
+    module = body.module
+    action = body.action
+    description = body.description
 
     if not module or not action:
         return {"error": "Module and action are required"}, 400
@@ -150,13 +150,3 @@ def update_permission(permission_id: int, body: PermissionUpdateRequest):
         "message": "Permission updated",
         "data": map_permission(permission).model_dump(),
     }, 200
-
-def normalize_text(value: str) -> str:
-    return value.strip()
-
-
-def normalize_optional_text(value: str | None) -> str | None:
-    if value is None:
-        return None
-    normalized = value.strip()
-    return normalized or None

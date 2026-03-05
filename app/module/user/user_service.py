@@ -82,9 +82,9 @@ def get_user_detail(user_id: int):
 
 
 def create_user(req: UserCreateRequest):
-    username = req.username.strip()
-    email = req.email.strip()
-    password = req.password.strip()
+    username = req.username
+    email = req.email
+    password = req.password
 
     if not username or not email or not password:
         return {"error": "Username, email, and password are required"}, 400
@@ -121,9 +121,9 @@ def update_user(user_id: int, req: UserUpdateRequest):
     if not user:
         return {"error": "User not found"}, 404
 
-    username = req.username.strip()
-    email = req.email.strip()
-    password = (req.password or "").strip()
+    username = req.username
+    email = req.email
+    password = req.password or ""
 
     if not username or not email:
         return {"error": "Username and email are required"}, 400
