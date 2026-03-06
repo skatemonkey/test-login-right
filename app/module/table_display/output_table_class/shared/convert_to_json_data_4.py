@@ -26,9 +26,9 @@ def convert_to_json_data(self):
                     row_idx += 1
 
         table_data = TableDataConfig(
-            cell_data=cell_data,
-            row_count=row_idx,
-            col_count=4
+            cellData=cell_data,
+            rowCount=row_idx,
+            colCount=4
         )
 
         return asdict(table_data)

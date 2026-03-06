@@ -64,9 +64,9 @@ def convert_to_json_data(self):
             cell_data.append(data_row)
 
         table_config = TableDataConfig(
-            cell_data=cell_data,
-            row_count=len(cell_data),
-            col_count=len(columns)
+            cellData=cell_data,
+            rowCount=len(cell_data),
+            colCount=len(columns)
         )
 
         return asdict(table_config)

@@ -1,4 +1,4 @@
-# AGENTS Guide
+# AGENTS Guide (retired - dont read this anymore)
 
 ## Purpose
 This file is the primary navigation map for AI agents working in this repository.
@@ -22,10 +22,11 @@ Use this map first and jump directly to listed files; avoid full codebase rescan
 5. Function-local imports are allowed only when required for circular/deferred loading (for example blueprint imports inside `app/__init__.py::create_app`).
 
 ## Engineering Standards
-Use PEP 8 conventions for Python code:
+Use PEP 8 conventions for Python code, with a project-specific exception:
 
 - Variables / functions / methods: `snake_case`
   Example: `user_id`, `get_user_by_id()`
+  Exception: data-model fields and API/table payload keys use `camelCase`.
 - Classes (including ORM models): `PascalCase` (CapWords)
   Example: `User`, `UserPermission`, `AuditLog`
 - Constants: `UPPER_SNAKE_CASE`

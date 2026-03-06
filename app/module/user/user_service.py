@@ -34,35 +34,35 @@ def query_users(query: UserListQuery):
 
     # Sort
     field_map = {
-        "user_id": User.user_id,
+        "userId": User.user_id,
         "username": User.username,
         "email": User.email,
-        "is_active": User.is_active,
-        "created_at": User.created_at,
-        "updated_at": User.updated_at,
+        "isActive": User.is_active,
+        "createdAt": User.created_at,
+        "updatedAt": User.updated_at,
     }
     q = pagination_utils.apply_sorting(
         q,
-        query.sort_field or "updated_at",
-        query.sort_order or "desc",
+        query.sortField or "updatedAt",
+        query.sortOrder or "desc",
         field_map,
         User.updated_at,
     )
 
     # Paginate
-    users, total, total_pages = pagination_utils.paginate(q, query.page, query.page_size)
+    users, total, total_pages = pagination_utils.paginate(q, query.page, query.pageSize)
 
     # Map
     permission_count_map = _get_permission_count_map([user.user_id for user in users])
     data = [
         UserListItem(
-            user_id=user.user_id,
+            userId=user.user_id,
             username=user.username or "",
             email=user.email or "",
-            is_active=bool(user.is_active),
-            permission_count=permission_count_map.get(user.user_id, 0),
-            created_at=_format_datetime(user.created_at),
-            updated_at=_format_datetime(user.updated_at),
+            isActive=bool(user.is_active),
+            permissionCount=permission_count_map.get(user.user_id, 0),
+            createdAt=_format_datetime(user.created_at),
+            updatedAt=_format_datetime(user.updated_at),
         )
         for user in users
     ]
@@ -70,9 +70,9 @@ def query_users(query: UserListQuery):
     return PaginatedResponse[UserListItem](
         data=data,
         page=query.page,
-        page_size=query.page_size,
-        total_elements=total,
-        total_pages=total_pages,
+        pageSize=query.pageSize,
+        totalElements=total,
+        totalPages=total_pages,
     ), 200
 
 
@@ -100,7 +100,7 @@ def create_user(req: UserCreateRequest):
         username=username,
         email=email,
         password_hash=_hash_password(password),
-        is_active=req.is_active,
+        is_active=req.isActive,
     )
 
     try:
@@ -142,7 +142,7 @@ def update_user(user_id: int, req: UserUpdateRequest):
 
     user.username = username
     user.email = email
-    user.is_active = req.is_active
+    user.is_active = req.isActive
     if password:
         user.password_hash = _hash_password(password)
 
@@ -181,7 +181,7 @@ def get_permission_matrix():
 
     data = [
         PermissionMatrixItem(
-            permission_id=permission.permission_id,
+            permissionId=permission.permission_id,
             module=permission.module or "",
             action=(permission.action or "").lower(),
         ).model_dump()
@@ -223,8 +223,8 @@ def toggle_user_permission(user_id: int, permission_id: int, enabled: bool):
     return {
         "message": "User permission updated",
         "data": {
-            "user_id": user_id,
-            "permission_id": permission_id,
+            "userId": user_id,
+            "permissionId": permission_id,
             "enabled": enabled,
         },
     }, 200
@@ -252,19 +252,19 @@ def _map_user_detail(user: User) -> UserDetail:
         },
     )
     return UserDetail(
-        user_id=user.user_id,
+        userId=user.user_id,
         username=user.username or "",
         email=user.email or "",
-        is_active=bool(user.is_active),
-        permission_ids=permission_ids,
-        created_at=_format_datetime(user.created_at),
-        updated_at=_format_datetime(user.updated_at),
+        isActive=bool(user.is_active),
+        permissionIds=permission_ids,
+        createdAt=_format_datetime(user.created_at),
+        updatedAt=_format_datetime(user.updated_at),
     )
 
 
 def _apply_user_filters(q, query: UserListQuery):
-    if query.filters and query.filters.is_active is not None:
-        q = q.filter(User.is_active == query.filters.is_active)
+    if query.filters and query.filters.isActive is not None:
+        q = q.filter(User.is_active == query.filters.isActive)
     return q
 
 

@@ -4,8 +4,8 @@ class OutputTable2:
         self.pickle_path = "/Users/user/hub/dev/test/output/table_2.pkl"
         self.column_names = {
             "instrument": "交易品种",
-            "bbo_spread": "CW Spread(个ticker)",
-            "mid_price_spread": "CW中间价-BN中间价的绝对值(个ticker)",
+            "bboSpread": "CW Spread(个ticker)",
+            "midPriceSpread": "CW中间价-BN中间价的绝对值(个ticker)",
         }
         self.column_display_order = ("交易品种", "CW Spread(个ticker)", "CW中间价-BN中间价的绝对值(个ticker)",)
         self.style_settings = {

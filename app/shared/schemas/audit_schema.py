@@ -6,7 +6,7 @@ from app.shared.schemas.pagination_schema import TableQueryBase
 
 
 class AuditLogRequest(BaseModel):
-    user_id: int
+    userId: int
     module: str
     action: str
     device: str
@@ -16,8 +16,8 @@ class AuditLogRequest(BaseModel):
 class AuditLogFilters(BaseModel):
     module: Optional[str] = None
     action: Optional[str] = None
-    date_from: Optional[str] = None
-    date_to: Optional[str] = None
+    dateFrom: Optional[str] = None
+    dateTo: Optional[str] = None
 
 
 class AuditLogQuery(TableQueryBase):
@@ -29,7 +29,7 @@ class AuditLogItem(BaseModel):
     username: str | None = None
     ip: str
     device: str
-    created_at: str
+    createdAt: str
     module: str
     action: str
     details: str

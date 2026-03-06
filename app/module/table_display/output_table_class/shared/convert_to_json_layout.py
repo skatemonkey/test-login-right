@@ -19,8 +19,8 @@ def convert_to_json_layout(self):
                 CellLayoutConfig(
                     row=row_idx,
                     col=col_idx,
-                    row_span=1,
-                    col_span=1
+                    rowSpan=1,
+                    colSpan=1
                 )
                 for col_idx in range(col_count)
             ]
@@ -28,9 +28,9 @@ def convert_to_json_layout(self):
         ]
 
         table_layout = TableLayoutConfig(
-            cell_layout=cell_layout,
-            row_count=row_count,
-            col_count=col_count
+            cellLayout=cell_layout,
+            rowCount=row_count,
+            colCount=col_count
         )
 
         return asdict(table_layout)

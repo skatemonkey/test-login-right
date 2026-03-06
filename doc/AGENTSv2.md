@@ -10,7 +10,16 @@
 - Import style: use absolute internal imports only (`from app...`), never relative imports (`from .` / `from ..`).
 - Import behavior modules (services/utils/stream modules) using namespace style and call via that namespace so source ownership is explicit.
 - Do not rely on package barrel exports from `__init__.py` (e.g., avoid `from app.shared.repository import User`); import from concrete module paths instead.
-- PEP 8 naming: functions/variables/modules `snake_case`, classes `PascalCase`, constants `UPPER_SNAKE_CASE`.
+- Naming conventions (project-specific):
+  - Data-model fields (Pydantic/dataclass): `camelCase` (e.g., `userId`, `createdAt`, `pageSize`).
+  - Wire payload keys (request/response/table JSON): `camelCase`.
+  - Internal variables (params/locals/helper internals/most `self` attrs): `snake_case`.
+  - Functions/methods: `snake_case`.
+  - Classes (including ORM models): `PascalCase`.
+  - Constants: `UPPER_SNAKE_CASE`.
+  - Modules/files/packages: `snake_case`.
+  - Repository/DB layer under `app/shared/repository` remains unchanged with snake_case DB/ORM naming.
+  - Exception: JWT query-string token parameter remains `access_token` (framework/config contract), not `accessToken`.
 
 
 ## 3. Module Catalog (Full Index)

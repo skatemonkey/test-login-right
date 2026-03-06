@@ -5,8 +5,8 @@ class OutputTable1:
         self.table_sn = 1
         self.column_names = {
             "instrument": "交易品种",
-            "bbo_spread": "CW Spread(个ticker)",
-            "mid_price_spread": "CW中间价-BN中间价的绝对值(个ticker)",
+            "bboSpread": "CW Spread(个ticker)",
+            "midPriceSpread": "CW中间价-BN中间价的绝对值(个ticker)",
 
         }
         self.total_table_title_rows = 1

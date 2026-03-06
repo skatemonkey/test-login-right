@@ -5,8 +5,8 @@ import time
 # Initial data
 table_data: dict[str, list] = {
     "instrument": ["ETHUSDT", "BCHUSDT", "PNUTUSDT"],
-    "bbo_spread": [6, 6, 0],
-    "mid_price_spread": [6, 6, 0],
+    "bboSpread": [6, 6, 0],
+    "midPriceSpread": [6, 6, 0],
 }
 
 pickle_path = "/Users/user/hub/dev/test/output/table_2.pkl"
@@ -22,8 +22,8 @@ def add_row():
         new_instrument = random.choice(available_instruments)
         available_instruments.remove(new_instrument)
         table_data["instrument"].append(new_instrument)
-        table_data["bbo_spread"].append(random.randint(0, 10))
-        table_data["mid_price_spread"].append(random.randint(0, 10))
+        table_data["bboSpread"].append(random.randint(0, 10))
+        table_data["midPriceSpread"].append(random.randint(0, 10))
         print(f"  Added row: {new_instrument}")
 
 
@@ -32,8 +32,8 @@ def remove_row():
     if len(table_data["instrument"]) > 1:
         idx = random.randint(0, len(table_data["instrument"]) - 1)
         removed = table_data["instrument"].pop(idx)
-        table_data["bbo_spread"].pop(idx)
-        table_data["mid_price_spread"].pop(idx)
+        table_data["bboSpread"].pop(idx)
+        table_data["midPriceSpread"].pop(idx)
         available_instruments.append(removed)  # Return to pool
         print(f"  Removed row: {removed}")
 
@@ -47,10 +47,10 @@ while True:
     elif action == "remove":
         remove_row()
 
-    # Update a random bbo_spread value
-    if table_data["bbo_spread"]:
-        idx = random.randint(0, len(table_data["bbo_spread"]) - 1)
-        table_data["bbo_spread"][idx] = counter
+    # Update a random bboSpread value
+    if table_data["bboSpread"]:
+        idx = random.randint(0, len(table_data["bboSpread"]) - 1)
+        table_data["bboSpread"][idx] = counter
 
     with open(pickle_path, "wb") as f:
         pickle.dump(table_data, f)

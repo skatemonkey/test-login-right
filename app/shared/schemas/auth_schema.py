@@ -7,9 +7,9 @@ class LoginRequest(BaseModel):
 
 
 class LoginResponse(BaseModel):
-    user_id: int
+    userId: int
     username: str
-    access_token: str
+    accessToken: str
     permissions: list[str]
 
 

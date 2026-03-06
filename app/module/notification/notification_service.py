@@ -60,10 +60,10 @@ def list_notifications_paginated(
     return NotificationPagination[NotificationItem](
         data=[_to_notification_payload(item) for item in notifications],
         page=page,
-        page_size=page_size,
-        total_elements=total_elements,
-        total_pages=total_pages,
-        has_more=page < total_pages,
+        pageSize=page_size,
+        totalElements=total_elements,
+        totalPages=total_pages,
+        hasMore=page < total_pages,
     ), 200
 
 
@@ -74,7 +74,7 @@ def get_unread_count(user_id: int) -> tuple[dict[str, int], int]:
         .count()
     )
 
-    return {"user_id": user_id, "unread_count": unread_count}, 200
+    return {"userId": user_id, "unreadCount": unread_count}, 200
 
 
 def mark_as_read(notification_id: int, user_id: int) -> tuple[dict[str, Any], int]:
@@ -110,14 +110,14 @@ def mark_all_as_read(user_id: int) -> tuple[dict[str, Any], int]:
     if updated_count > 0:
         db.session.commit()
 
-    return {"message": "All notifications marked as read", "updated_count": updated_count}, 200
+    return {"message": "All notifications marked as read", "updatedCount": updated_count}, 200
 
 
 def _to_notification_payload(notification: Notification) -> dict[str, Any]:
     return {
         "id": notification.id,
-        "user_id": notification.user_id,
+        "userId": notification.user_id,
         "message": notification.message,
-        "is_read": bool(notification.is_read),
-        "created_at": notification.created_at.strftime("%Y-%m-%d %H:%M:%S") if notification.created_at else "",
+        "isRead": bool(notification.is_read),
+        "createdAt": notification.created_at.strftime("%Y-%m-%d %H:%M:%S") if notification.created_at else "",
     }
