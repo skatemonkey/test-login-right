@@ -2,8 +2,8 @@ from dataclasses import asdict
 import pickle
 import traceback
 
-from app.module.table_display.output_table_class.shared import style_resolver, value_format_resolver
-from app.module.table_display.schema.table_schema import CellDataConfig, TableDataConfig
+from app.module.table.table_display.output_table_class.shared import style_resolver, value_format_resolver
+from app.module.table.table_display.schema.table_schema import CellDataConfig, TableDataConfig
 
 
 def convert_to_json_data(self):

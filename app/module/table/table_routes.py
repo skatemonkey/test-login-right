@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required
 
-from app.module.table_display.table_registry import TABLE_CLASSES
+from app.module.table.table_display.table_registry import TABLE_CLASSES
 
 table_bp = Blueprint("table", __name__)
 

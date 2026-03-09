@@ -2,7 +2,7 @@ from dataclasses import asdict
 import pickle
 import traceback
 
-from app.module.table_display.schema.table_schema import CellLayoutConfig, TableLayoutConfig
+from app.module.table.table_display.schema.table_schema import CellLayoutConfig, TableLayoutConfig
 
 
 def convert_to_json_layout(self):

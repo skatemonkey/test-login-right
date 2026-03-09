@@ -1,4 +1,4 @@
-from app.module.table_display.output_table_class.shared.value_format_functions import VALUE_FORMAT_FUNCTIONS
+from app.module.table.table_display.output_table_class.shared.value_format_functions import VALUE_FORMAT_FUNCTIONS
 
 
 def _get_value_rule(value_format_settings, row, col):

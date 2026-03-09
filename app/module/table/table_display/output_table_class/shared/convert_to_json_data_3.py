@@ -1,7 +1,7 @@
 from dataclasses import asdict
 import traceback
 
-from app.module.table_display.schema.table_schema import CellDataConfig, TableDataConfig
+from app.module.table.table_display.schema.table_schema import CellDataConfig, TableDataConfig
 
 
 def convert_to_json_data(self):

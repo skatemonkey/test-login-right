@@ -19,6 +19,3 @@ class OutputTable2:
             "col": {2: 1},
             "cell": {(2, 1): 1}
         }
-
-    from app.module.table_display.output_table_class.shared.convert_to_json_data import convert_to_json_data
-    from app.module.table_display.output_table_class.shared.convert_to_json_layout import convert_to_json_layout
