@@ -27,6 +27,10 @@ class Config:
     # JWT Configuration
     # TODO: In production, load this from environment variable
     JWT_SECRET_KEY = "your-super-secret-key-change-in-production"
+    REDIS_URL = (
+        "redis://default:pD8Pvvvx3R2mzZUEzUrCqwtQxobrEpr8@"
+        "redis-15870.c11.us-east-1-2.ec2.cloud.redislabs.com:15870"
+    )
 
     # Token expires in 30 minutes
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=20)

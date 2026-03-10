@@ -12,6 +12,7 @@ pymysql = "*"
 requests = "*"
 pydantic = "*"
 flask-pydantic = "*"
+redis = "*"
 
 [dev-packages]
 ruff = "*"
