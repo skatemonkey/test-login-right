@@ -20,3 +20,6 @@ class OutputTable3:
             rowCount=9,
             colCount=4
         )
+
+    from ..shared.convert_to_json_layout_3 import convert_to_json_layout
+    from ..shared.convert_to_json_data_3 import convert_to_json_data
