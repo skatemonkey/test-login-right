@@ -60,6 +60,18 @@
   - `app/shared/schemas/notification_schema.py`
   - `app/shared/repository/notification.py`
 
+### `line_chart` (`app/module/line_chart`)
+- Blueprint prefix: `/line-chart`
+- Endpoints:
+  - `POST /line-chart/history`
+  - `GET /line-chart/stream` (SSE)
+- Key files:
+  - `app/module/line_chart/routes/line_chart_routes.py`
+  - `app/module/line_chart/services/line_chart_service.py`
+  - `app/module/line_chart/services/line_chart_stream_service.py`
+  - `app/shared/schemas/line_chart_schema.py`
+  - `app/module/line_chart/pickle_test/long_running_program_demo.py`
+
 ### `table` (`app/module/table`)
 - Blueprint prefix: `/tables`
 - Endpoints:

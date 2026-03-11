@@ -60,12 +60,39 @@ class LineChart1TestCase(unittest.TestCase):
         payload, score = next(iter(zadd_args[1].items()))
         self.assertEqual(score, now)
         self.assertEqual(json.loads(payload), expected_sample)
+        redis_client.publish.assert_called_once_with(line_chart_1.LIVE_UPDATES_CHANNEL, payload)
 
         redis_client.zremrangebyscore.assert_called_once_with(
             line_chart_1.REDIS_KEY,
             "-inf",
             now - line_chart_1.RETENTION_SECONDS - 1,
         )
+
+    def test_reset_and_seed_history_defaults_to_five_hours(self):
+        redis_client = Mock()
+
+        def make_sample(timestamp):
+            return {
+                "timestamp": timestamp,
+                "cpu": 1.0,
+                "network": 2.0,
+                "memory": 3.0,
+            }
+
+        with patch.object(line_chart_1, "create_sample", side_effect=make_sample):
+            seeded_count = line_chart_1.reset_and_seed_history(redis_client, now=18_000)
+
+        expected_count = (
+            line_chart_1.INITIAL_HISTORY_SECONDS // line_chart_1.SAMPLE_INTERVAL_SECONDS
+        ) + 1
+        self.assertEqual(line_chart_1.INITIAL_HISTORY_SECONDS, 5 * 60 * 60)
+        self.assertEqual(seeded_count, expected_count)
+
+        zadd_args, _ = redis_client.zadd.call_args
+        stored_timestamps = sorted(zadd_args[1].values())
+        self.assertEqual(stored_timestamps[0], 0)
+        self.assertEqual(stored_timestamps[-1], 18_000)
+        redis_client.publish.assert_not_called()
 
     def test_reset_and_seed_history_clears_key_and_stores_expected_window(self):
         redis_client = Mock()
@@ -109,6 +136,7 @@ class LineChart1TestCase(unittest.TestCase):
                 {"timestamp": 100, "cpu": 100.0, "network": 101.0, "memory": 102.0},
             ],
         )
+        redis_client.publish.assert_not_called()
 
     def test_run_forever_runs_one_iteration_before_sleep_stops(self):
         redis_client = Mock()

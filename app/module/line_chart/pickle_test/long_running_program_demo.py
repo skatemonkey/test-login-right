@@ -10,8 +10,9 @@ REDIS_URL = (
     "redis-15870.c11.us-east-1-2.ec2.cloud.redislabs.com:15870"
 )
 REDIS_KEY = "line_chart:points"
+LIVE_UPDATES_CHANNEL = "line_chart:updates"
 SAMPLE_INTERVAL_SECONDS = 5
-INITIAL_HISTORY_SECONDS = 2 * 60 * 60
+INITIAL_HISTORY_SECONDS = 5 * 60 * 60
 RETENTION_SECONDS = 7 * 24 * 60 * 60
 
 
@@ -35,6 +36,7 @@ def serialize_sample(sample):
 def save_sample(redis_client, sample):
     payload = serialize_sample(sample)
     redis_client.zadd(REDIS_KEY, {payload: sample["timestamp"]})
+    redis_client.publish(LIVE_UPDATES_CHANNEL, payload)
 
     cutoff_timestamp = sample["timestamp"] - RETENTION_SECONDS
     removed_count = redis_client.zremrangebyscore(
@@ -100,7 +102,7 @@ def main():
     redis_client = get_redis_client()
     print(f"Writing samples to Redis sorted set {REDIS_KEY}")
     seeded_count = reset_and_seed_history(redis_client)
-    print(f"Seeded {seeded_count} samples covering the last 2 hours")
+    print(f"Seeded {seeded_count} samples covering the last 5 hours")
     run_forever(redis_client, sleep_first=True)
 
 
