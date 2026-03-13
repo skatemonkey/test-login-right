@@ -112,8 +112,8 @@
     {
       "id": "core-box",
       "type": "rectangle",
-      "x": 78,
-      "y": 209,
+      "x": 98,
+      "y": 249,
       "width": 280,
       "height": 300,
       "angle": 0,
@@ -131,11 +131,16 @@
         "type": 3
       },
       "seed": 1004,
-      "version": 48,
-      "versionNonce": 611417890,
+      "version": 82,
+      "versionNonce": 61718220,
       "isDeleted": false,
-      "boundElements": [],
-      "updated": 1773358261315,
+      "boundElements": [
+        {
+          "id": "arrow-app-core",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1773364682683,
       "link": null,
       "locked": false
     },
@@ -335,11 +340,11 @@
         "type": 2
       },
       "seed": 1010,
-      "version": 1,
-      "versionNonce": 2010,
+      "version": 2,
+      "versionNonce": 1490069580,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1773273600000,
+      "updated": 1773364682683,
       "link": null,
       "locked": false,
       "points": [
@@ -354,7 +359,11 @@
       ],
       "lastCommittedPoint": null,
       "startBinding": null,
-      "endBinding": null,
+      "endBinding": {
+        "elementId": "core-box",
+        "focus": -0.9023952095808384,
+        "gap": 9
+      },
       "startArrowhead": null,
       "endArrowhead": "triangle",
       "elbowed": false
