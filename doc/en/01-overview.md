@@ -4,14 +4,14 @@ Read [00-doc-catalog.md](./00-doc-catalog.md) first, then use this file for syst
 
 ## 1. System & Environment
 
-### Tech Stack
+### 1.1 Tech Stack
 - Python 3.13
 - Flask API stack: Flask, Flask-CORS, Flask-JWT-Extended, Flask-SQLAlchemy, Flask-Pydantic
 - Data and infra: MySQL via PyMySQL, Redis, `requests`
 - Modeling and validation: Pydantic
 - Quality and tests: `unittest`, Ruff, isort
 
-### Commands to run / build / test
+### 1.2 Commands to run / build / test
 ```bash
 pipenv install
 pipenv run python app.py
@@ -23,7 +23,7 @@ There is no separate build step. Install dependencies before running the app or 
 
 ## 2. System Architecture
 
-### High-level architecture
+### 2.1 High-level architecture
 - `app.py` starts the server, and `app/__init__.py::create_app()` loads config, initializes JWT, database, CORS, and Redis, then registers feature blueprints.
 - The repo follows `core -> module -> shared`:
   - `core`: app-level infrastructure and extension setup
@@ -40,7 +40,7 @@ There is no separate build step. Install dependencies before running the app or 
 - `line_chart` and `table` remain current exceptions in this phase because they use non-SQL access patterns.
 - Add new features under `app/module/<feature>/`. To trace a DB-backed request, start at a route, then move to its service and repository dependencies; use `shared` models, schemas, and utilities as supporting context.
 
-### File Structure
+### 2.2 File Structure
 ```text
 app/
   core/

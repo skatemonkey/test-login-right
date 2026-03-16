@@ -2,7 +2,7 @@
 
 先读 [../00-doc-catalog.md](../00-doc-catalog.md) 和 [../01-overview.md](../01-overview.md)，再使用本文件作为功能索引。
 
-### `auth` (`app/module/auth`)
+## 1. `auth` (`app/module/auth`)
 - Blueprint 前缀：`/auth`
 - 接口：
   - `POST /auth/login`
@@ -12,7 +12,7 @@
   - `app/module/auth/auth_repository.py`
   - `app/shared/schemas/auth_schema.py`
 
-### `audit` (`app/module/audit`)
+## 2. `audit` (`app/module/audit`)
 - Blueprint 前缀：`/audit`
 - 接口：
   - `POST /audit/log`
@@ -24,7 +24,7 @@
   - `app/shared/schemas/audit_schema.py`
   - `app/shared/model/audit_log.py`
 
-### `notification` (`app/module/notification`)
+## 3. `notification` (`app/module/notification`)
 - Blueprint 前缀：`/notifications`
 - 接口：
   - `GET /notifications`
@@ -41,7 +41,7 @@
   - `app/shared/schemas/notification_schema.py`
   - `app/shared/model/notification.py`
 
-### `line_chart` (`app/module/line_chart`)
+## 4. `line_chart` (`app/module/line_chart`)
 - Blueprint 前缀：`/line-chart`
 - 当前例外：这是非 SQL 模块，本阶段不引入 repository 层。
 - 接口：
@@ -54,7 +54,7 @@
   - `app/shared/schemas/line_chart_schema.py`
   - `app/module/line_chart/pickle_test/long_running_program_demo.py`
 
-### `table` (`app/module/table`)
+## 5. `table` (`app/module/table`)
 - Blueprint 前缀：`/tables`
 - 当前例外：route 直接调用内部 table display 代码，本阶段不引入 repository 层。
 - 接口：
@@ -64,7 +64,7 @@
   - `app/module/table/table_routes.py`
   - `app/module/table/table_display/table_registry.py`
 
-### `permission` (`app/module/permission`)
+## 6. `permission` (`app/module/permission`)
 - Blueprint 前缀：`/permissions`
 - 接口：
   - `POST /permissions/query`
@@ -77,7 +77,7 @@
   - `app/shared/schemas/permission_schema.py`
   - `app/shared/model/permission.py`
 
-### `user` (`app/module/user`)
+## 7. `user` (`app/module/user`)
 - Blueprint 前缀：`/users`
 - 接口：
   - `POST /users/query`
@@ -94,7 +94,7 @@
   - `app/shared/model/user.py`
   - `app/shared/model/user_permission.py`
 
-### `table-display` (`app/module/table/table_display`)
+## 8. `table-display` (`app/module/table/table_display`)
 - 用途：供 `/tables/*` 接口使用的内部表格布局 / 数据生成模块。
 - 关键文件：
   - `app/module/table/table_display/table_registry.py`

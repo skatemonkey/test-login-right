@@ -2,7 +2,7 @@
 
 Read [../00-doc-catalog.md](../00-doc-catalog.md) first and [../01-overview.md](../01-overview.md) for system context, then use this file as the feature index.
 
-### `auth` (`app/module/auth`)
+## 1. `auth` (`app/module/auth`)
 - Blueprint prefix: `/auth`
 - Endpoints:
   - `POST /auth/login`
@@ -12,7 +12,7 @@ Read [../00-doc-catalog.md](../00-doc-catalog.md) first and [../01-overview.md](
   - `app/module/auth/auth_repository.py`
   - `app/shared/schemas/auth_schema.py`
 
-### `audit` (`app/module/audit`)
+## 2. `audit` (`app/module/audit`)
 - Blueprint prefix: `/audit`
 - Endpoints:
   - `POST /audit/log`
@@ -24,7 +24,7 @@ Read [../00-doc-catalog.md](../00-doc-catalog.md) first and [../01-overview.md](
   - `app/shared/schemas/audit_schema.py`
   - `app/shared/model/audit_log.py`
 
-### `notification` (`app/module/notification`)
+## 3. `notification` (`app/module/notification`)
 - Blueprint prefix: `/notifications`
 - Endpoints:
   - `GET /notifications`
@@ -41,7 +41,7 @@ Read [../00-doc-catalog.md](../00-doc-catalog.md) first and [../01-overview.md](
   - `app/shared/schemas/notification_schema.py`
   - `app/shared/model/notification.py`
 
-### `line_chart` (`app/module/line_chart`)
+## 4. `line_chart` (`app/module/line_chart`)
 - Blueprint prefix: `/line-chart`
 - Current exception: non-SQL module; repository layer is not introduced in this phase.
 - Endpoints:
@@ -54,7 +54,7 @@ Read [../00-doc-catalog.md](../00-doc-catalog.md) first and [../01-overview.md](
   - `app/shared/schemas/line_chart_schema.py`
   - `app/module/line_chart/pickle_test/long_running_program_demo.py`
 
-### `table` (`app/module/table`)
+## 5. `table` (`app/module/table`)
 - Blueprint prefix: `/tables`
 - Current exception: route handlers call internal table display code directly; repository layer is not introduced in this phase.
 - Endpoints:
@@ -64,7 +64,7 @@ Read [../00-doc-catalog.md](../00-doc-catalog.md) first and [../01-overview.md](
   - `app/module/table/table_routes.py`
   - `app/module/table/table_display/table_registry.py`
 
-### `permission` (`app/module/permission`)
+## 6. `permission` (`app/module/permission`)
 - Blueprint prefix: `/permissions`
 - Endpoints:
   - `POST /permissions/query`
@@ -77,7 +77,7 @@ Read [../00-doc-catalog.md](../00-doc-catalog.md) first and [../01-overview.md](
   - `app/shared/schemas/permission_schema.py`
   - `app/shared/model/permission.py`
 
-### `user` (`app/module/user`)
+## 7. `user` (`app/module/user`)
 - Blueprint prefix: `/users`
 - Endpoints:
   - `POST /users/query`
@@ -94,7 +94,7 @@ Read [../00-doc-catalog.md](../00-doc-catalog.md) first and [../01-overview.md](
   - `app/shared/model/user.py`
   - `app/shared/model/user_permission.py`
 
-### `table-display` (`app/module/table/table_display`)
+## 8. `table-display` (`app/module/table/table_display`)
 - Purpose: internal table layout/data generation used by `/tables/*` endpoints.
 - Key files:
   - `app/module/table/table_display/table_registry.py`

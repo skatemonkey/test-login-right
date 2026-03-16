@@ -4,14 +4,14 @@
 
 ## 1. 系统与环境
 
-### 技术栈
+### 1.1 技术栈
 - Python 3.13
 - Flask API 栈：Flask、Flask-CORS、Flask-JWT-Extended、Flask-SQLAlchemy、Flask-Pydantic
 - 数据与基础设施：MySQL（通过 PyMySQL）、Redis、`requests`
 - 建模与校验：Pydantic
 - 质量与测试：`unittest`、Ruff、isort
 
-### 运行 / 构建 / 测试命令
+### 1.2 运行 / 构建 / 测试命令
 ```bash
 pipenv install
 pipenv run python app.py
@@ -23,7 +23,7 @@ pipenv run ruff check app tests
 
 ## 2. 系统架构
 
-### 高层架构
+### 2.1 高层架构
 - `app.py` 用于启动服务，`app/__init__.py::create_app()` 负责加载配置、初始化 JWT、数据库、CORS 和 Redis，并注册各个 blueprint。
 - 仓库结构遵循 `core -> module -> shared`：
   - `core`：应用级基础设施与扩展初始化。
@@ -40,7 +40,7 @@ pipenv run ruff check app tests
 - `line_chart` 与 `table` 在本阶段仍保留现有的非 SQL 结构，暂不纳入 repository 模式。
 - 新功能放在 `app/module/<feature>/` 下。排查数据库模块请求时，先看 route，再看对应 service 与 repository 依赖；`shared` 中的 models、schemas 和 utilities 作为辅助上下文查看。
 
-### 文件结构
+### 2.2 文件结构
 ```text
 app/
   core/
