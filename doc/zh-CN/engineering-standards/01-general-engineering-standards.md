@@ -13,8 +13,8 @@
   - 应当：`from app.module.notification import notification_service`，然后调用 `notification_service.create_notification(...)`。
   - 不要：`from app.module.notification.notification_service import create_notification`。
 - Barrel export 规则：不要通过 package 的 `__init__.py` 导入；应直接从具体模块路径导入。
-  - 应当：`from app.shared.repository.user import User`。
-  - 不要：`from app.shared.repository import User`。
+  - 应当：`from app.shared.model.user import User`。
+  - 不要：`from app.shared.model import User`。
 - 命名约定（项目特定）：
   - Pydantic / dataclass 字段：`camelCase`（例如 `userId`、`createdAt`、`pageSize`）。
   - 请求 / 响应 / 表格 JSON 的字段：`camelCase`。
@@ -23,5 +23,5 @@
   - 类（含 ORM model）：`PascalCase`。
   - 常量：`UPPER_SNAKE_CASE`。
   - 模块 / 文件 / 包：`snake_case`。
-  - `app/shared/repository` 下的 repository / 数据库层继续保持 snake_case 命名。
+  - `app/shared/model` 下的 model / 数据库层继续保持 snake_case 包名与模块名。
   - 例外：JWT query-string 参数保持 `access_token`，不要改成 `accessToken`。

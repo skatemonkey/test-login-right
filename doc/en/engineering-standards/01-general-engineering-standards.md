@@ -14,8 +14,8 @@ Read [00-eng-std-catalog.md](./00-eng-std-catalog.md) first and [../01-overview.
   - Do: `from app.module.notification import notification_service` then `notification_service.create_notification(...)`.
   - Don't: `from app.module.notification.notification_service import create_notification`.
 - Barrel export rule: do not import through package `__init__.py`; import from the concrete module path instead.
-  - Do: `from app.shared.repository.user import User`.
-  - Don't: `from app.shared.repository import User`.
+  - Do: `from app.shared.model.user import User`.
+  - Don't: `from app.shared.model import User`.
 - Naming conventions (project-specific):
   - Data-model fields (Pydantic/dataclass): `camelCase` (e.g., `userId`, `createdAt`, `pageSize`).
   - Wire payload keys (request/response/table JSON): `camelCase`.
@@ -24,5 +24,5 @@ Read [00-eng-std-catalog.md](./00-eng-std-catalog.md) first and [../01-overview.
   - Classes (including ORM models): `PascalCase`.
   - Constants: `UPPER_SNAKE_CASE`.
   - Modules/files/packages: `snake_case`.
-  - Repository/DB layer under `app/shared/repository` remains unchanged with snake_case DB/ORM naming.
+  - Model/DB layer under `app/shared/model` keeps snake_case package/module naming for ORM files.
   - Exception: JWT query-string token parameter remains `access_token` (framework/config contract), not `accessToken`.

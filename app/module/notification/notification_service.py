@@ -4,7 +4,7 @@ from sqlalchemy import update
 
 from app.core import db
 from app.module.notification import notification_stream
-from app.shared.repository.notification import Notification
+from app.shared.model.notification import Notification
 from app.shared.schemas.notification_schema import NotificationItem
 from app.shared.schemas.pagination_schema import NotificationPagination
 

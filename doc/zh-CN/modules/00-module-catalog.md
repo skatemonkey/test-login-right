@@ -20,7 +20,7 @@
   - `app/module/audit/audit_routes.py`
   - `app/module/audit/audit_service.py`
   - `app/shared/schemas/audit_schema.py`
-  - `app/shared/repository/audit_log.py`
+  - `app/shared/model/audit_log.py`
 
 ### `notification` (`app/module/notification`)
 - Blueprint 前缀：`/notifications`
@@ -36,7 +36,7 @@
   - `app/module/notification/notification_service.py`
   - `app/module/notification/notification_stream.py`
   - `app/shared/schemas/notification_schema.py`
-  - `app/shared/repository/notification.py`
+  - `app/shared/model/notification.py`
 
 ### `line_chart` (`app/module/line_chart`)
 - Blueprint 前缀：`/line-chart`
@@ -69,7 +69,7 @@
   - `app/module/permission/permission_routes.py`
   - `app/module/permission/permission_service.py`
   - `app/shared/schemas/permission_schema.py`
-  - `app/shared/repository/permission.py`
+  - `app/shared/model/permission.py`
 
 ### `user` (`app/module/user`)
 - Blueprint 前缀：`/users`
@@ -84,8 +84,8 @@
   - `app/module/user/user_routes.py`
   - `app/module/user/user_service.py`
   - `app/shared/schemas/user_schema.py`
-  - `app/shared/repository/user.py`
-  - `app/shared/repository/user_permission.py`
+  - `app/shared/model/user.py`
+  - `app/shared/model/user_permission.py`
 
 ### `table-display` (`app/module/table/table_display`)
 - 用途：供 `/tables/*` 接口使用的内部表格布局 / 数据生成模块。

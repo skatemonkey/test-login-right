@@ -8,7 +8,7 @@ from app.core import db
 from app.shared.utils import time as time_utils
 
 if TYPE_CHECKING:
-    from app.shared.repository.user import User
+    from app.shared.model.user import User
 
 
 class Notification(db.Model):

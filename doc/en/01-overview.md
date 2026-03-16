@@ -28,11 +28,11 @@ There is no separate build step. Install dependencies before running the app or 
 - The repo follows `core -> module -> shared`:
   - `core`: app-level infrastructure and extension setup
   - `module`: feature packages such as `auth`, `audit`, `notification`, `permission`, `user`, `table`, and `line_chart`
-  - `shared`: reusable repositories, schemas, and utilities used across features
+  - `shared`: reusable SQLAlchemy models, schemas, and utilities used across features
 - The common request path is `routes -> services -> shared`:
   - `routes`: HTTP, auth decorators, and response shaping
   - `services`: business logic
-  - `shared`: schemas, repositories, and cross-feature helpers
+  - `shared`: schemas, models, and cross-feature helpers
 - Add new features under `app/module/<feature>/`. To trace a request, start at a route, then move to its service and shared dependencies.
 
 ### File Structure
@@ -42,7 +42,7 @@ app/
   module/
     auth/ audit/ notification/ permission/ user/ table/ line_chart/
   shared/
-    repository/ schemas/ utils/
+    model/ schemas/ utils/
 tests/
 doc/
 ```

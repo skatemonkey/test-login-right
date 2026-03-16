@@ -1,7 +1,7 @@
 from sqlalchemy.exc import IntegrityError
 
 from app.core import db
-from app.shared.repository.permission import Permission
+from app.shared.model.permission import Permission
 from app.shared.schemas.pagination_schema import PaginatedResponse
 from app.shared.schemas.permission_schema import (
     PermissionCreateRequest,

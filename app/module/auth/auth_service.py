@@ -1,7 +1,7 @@
 from flask_jwt_extended import create_access_token
 from werkzeug.security import check_password_hash
 
-from app.shared.repository.user import User
+from app.shared.model.user import User
 from app.shared.schemas.auth_schema import ErrorResponse, LoginRequest, LoginResponse
 
 

@@ -8,8 +8,8 @@ from app.core import db
 from app.shared.utils import time as time_utils
 
 if TYPE_CHECKING:
-    from app.shared.repository.notification import Notification
-    from app.shared.repository.user_permission import UserPermission
+    from app.shared.model.notification import Notification
+    from app.shared.model.user_permission import UserPermission
 
 
 class User(db.Model):

@@ -2,8 +2,8 @@ from datetime import datetime
 import json
 
 from app.core import db
-from app.shared.repository.audit_log import AuditLog
-from app.shared.repository.user import User
+from app.shared.model.audit_log import AuditLog
+from app.shared.model.user import User
 from app.shared.schemas.audit_schema import AuditLogFilters, AuditLogItem, AuditLogQuery, AuditLogRequest
 from app.shared.schemas.pagination_schema import PaginatedResponse
 from app.shared.utils import pagination_utils
