@@ -1,6 +1,6 @@
-# 工程规范
+# 通用工程规范
 
-先读 [00-table-of-contents.md](./00-table-of-contents.md) 和 [01-overview.md](./01-overview.md)，再用本文件作为人类与 AI 共同遵循的编码规范基准。
+先读本目录中的 [00-eng-std-catalog.md](./00-eng-std-catalog.md) 和 [../01-overview.md](../01-overview.md)，再用本文件作为人类与 AI 共同遵循的编码规范基准。
 
 - 架构流向：
   - 结构：`core -> module -> shared`。

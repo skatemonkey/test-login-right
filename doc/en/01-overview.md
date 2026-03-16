@@ -1,6 +1,6 @@
 # Overview
 
-Read [00-table-of-contents.md](./00-table-of-contents.md) first, then use this file for system context. Next: [02-engineering-standards.md](./02-engineering-standards.md) and [03-module-catalog.md](./03-module-catalog.md).
+Read [00-doc-catalog.md](./00-doc-catalog.md) first, then use this file for system context. Next: [engineering-standards/00-eng-std-catalog.md](./engineering-standards/00-eng-std-catalog.md) and [modules/00-module-catalog.md](./modules/00-module-catalog.md).
 
 ## 1. System & Environment
 

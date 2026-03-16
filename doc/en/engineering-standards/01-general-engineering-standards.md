@@ -1,6 +1,6 @@
-# Engineering Standards
+# General Engineering Standards
 
-Read [00-table-of-contents.md](./00-table-of-contents.md) first and [01-overview.md](./01-overview.md) for system context, then use this file as the canonical coding rules reference for humans and AI agents.
+Read [00-eng-std-catalog.md](./00-eng-std-catalog.md) first and [../01-overview.md](../01-overview.md) for system context, then use this file as the canonical coding rules reference for humans and AI agents.
 
 
 - Architecture flow:

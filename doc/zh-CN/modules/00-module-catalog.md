@@ -1,6 +1,6 @@
 # 模块目录
 
-先读 [00-table-of-contents.md](./00-table-of-contents.md) 和 [01-overview.md](./01-overview.md)，再使用本文件作为功能索引。
+先读 [../00-doc-catalog.md](../00-doc-catalog.md) 和 [../01-overview.md](../01-overview.md)，再使用本文件作为功能索引。
 
 ### `auth` (`app/module/auth`)
 - Blueprint 前缀：`/auth`
@@ -57,7 +57,7 @@
   - `GET /tables/data/<table_id>`
 - 关键文件：
   - `app/module/table/table_routes.py`
-  - `app/module/table_display/table_registry.py`
+  - `app/module/table/table_display/table_registry.py`
 
 ### `permission` (`app/module/permission`)
 - Blueprint 前缀：`/permissions`
@@ -87,14 +87,14 @@
   - `app/shared/repository/user.py`
   - `app/shared/repository/user_permission.py`
 
-### `table-display` (`app/module/table_display`)
+### `table-display` (`app/module/table/table_display`)
 - 用途：供 `/tables/*` 接口使用的内部表格布局 / 数据生成模块。
 - 关键文件：
-  - `app/module/table_display/table_registry.py`
-  - `app/module/table_display/schema/table_schema.py`
-  - `app/module/table_display/output_table_class/output_table_1_class/__init__.py`
-  - `app/module/table_display/output_table_class/output_table_2_class/__init__.py`
-  - `app/module/table_display/output_table_class/output_table_3_class/__init__.py`
-  - `app/module/table_display/output_table_class/output_table_4_class/__init__.py`
-  - `app/module/table_display/output_table_class/shared/convert_to_json_layout.py`
-  - `app/module/table_display/output_table_class/shared/convert_to_json_data.py`
+  - `app/module/table/table_display/table_registry.py`
+  - `app/module/table/table_display/schema/table_schema.py`
+  - `app/module/table/table_display/output_table_class/output_table_1_class/__init__.py`
+  - `app/module/table/table_display/output_table_class/output_table_2_class/__init__.py`
+  - `app/module/table/table_display/output_table_class/output_table_3_class/__init__.py`
+  - `app/module/table/table_display/output_table_class/output_table_4_class/__init__.py`
+  - `app/module/table/table_display/output_table_class/shared/convert_to_json_layout.py`
+  - `app/module/table/table_display/output_table_class/shared/convert_to_json_data.py`

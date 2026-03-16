@@ -1,6 +1,6 @@
 # Module Catalog
 
-Read [00-table-of-contents.md](./00-table-of-contents.md) first and [01-overview.md](./01-overview.md) for system context, then use this file as the feature index.
+Read [../00-doc-catalog.md](../00-doc-catalog.md) first and [../01-overview.md](../01-overview.md) for system context, then use this file as the feature index.
 
 ### `auth` (`app/module/auth`)
 - Blueprint prefix: `/auth`
@@ -57,7 +57,7 @@ Read [00-table-of-contents.md](./00-table-of-contents.md) first and [01-overview
   - `GET /tables/data/<table_id>`
 - Key files:
   - `app/module/table/table_routes.py`
-  - `app/module/table_display/table_registry.py`
+  - `app/module/table/table_display/table_registry.py`
 
 ### `permission` (`app/module/permission`)
 - Blueprint prefix: `/permissions`
@@ -87,14 +87,14 @@ Read [00-table-of-contents.md](./00-table-of-contents.md) first and [01-overview
   - `app/shared/repository/user.py`
   - `app/shared/repository/user_permission.py`
 
-### `table-display` (`app/module/table_display`)
+### `table-display` (`app/module/table/table_display`)
 - Purpose: internal table layout/data generation used by `/tables/*` endpoints.
 - Key files:
-  - `app/module/table_display/table_registry.py`
-  - `app/module/table_display/schema/table_schema.py`
-  - `app/module/table_display/output_table_class/output_table_1_class/__init__.py`
-  - `app/module/table_display/output_table_class/output_table_2_class/__init__.py`
-  - `app/module/table_display/output_table_class/output_table_3_class/__init__.py`
-  - `app/module/table_display/output_table_class/output_table_4_class/__init__.py`
-  - `app/module/table_display/output_table_class/shared/convert_to_json_layout.py`
-  - `app/module/table_display/output_table_class/shared/convert_to_json_data.py`
+  - `app/module/table/table_display/table_registry.py`
+  - `app/module/table/table_display/schema/table_schema.py`
+  - `app/module/table/table_display/output_table_class/output_table_1_class/__init__.py`
+  - `app/module/table/table_display/output_table_class/output_table_2_class/__init__.py`
+  - `app/module/table/table_display/output_table_class/output_table_3_class/__init__.py`
+  - `app/module/table/table_display/output_table_class/output_table_4_class/__init__.py`
+  - `app/module/table/table_display/output_table_class/shared/convert_to_json_layout.py`
+  - `app/module/table/table_display/output_table_class/shared/convert_to_json_data.py`
