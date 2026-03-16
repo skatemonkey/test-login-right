@@ -32,11 +32,13 @@ There is no separate build step. Install dependencies before running the app or 
     - models: SQLAlchemy table definitions
     - schemas: Request/Response models (DTOs)
     - utilities: common helper functions
-- The common request path is `routes -> services -> repositories`:
+- The common request path for DB-backed modules is `routes -> services -> repositories`:
   - `routes`: HTTP, auth decorators, and response shaping
   - `services`: business logic
   - `repositories`: database operations and queries
-- Add new features under `app/module/<feature>/`. To trace a request, start at a route, then move to its service and repository dependencies; use `shared` models, schemas, and utilities as supporting context.
+- DB-backed modules commonly use the flat trio `*_routes.py`, `*_service.py`, and `*_repository.py`.
+- `line_chart` and `table` remain current exceptions in this phase because they use non-SQL access patterns.
+- Add new features under `app/module/<feature>/`. To trace a DB-backed request, start at a route, then move to its service and repository dependencies; use `shared` models, schemas, and utilities as supporting context.
 
 ### File Structure
 ```text

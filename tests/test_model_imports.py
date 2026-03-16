@@ -10,6 +10,7 @@ class ModelImportTests(unittest.TestCase):
             "app.shared.model.permission",
             "app.shared.model.user",
             "app.shared.model.user_permission",
+            "app.shared.utils.db_session_utils",
         ]
 
         for module_name in module_names:
@@ -20,10 +21,15 @@ class ModelImportTests(unittest.TestCase):
     def test_services_import_with_model_package_dependencies(self):
         module_names = [
             "app.module.audit.audit_service",
+            "app.module.audit.audit_repository",
             "app.module.auth.auth_service",
+            "app.module.auth.auth_repository",
             "app.module.notification.notification_service",
+            "app.module.notification.notification_repository",
             "app.module.permission.permission_service",
+            "app.module.permission.permission_repository",
             "app.module.user.user_service",
+            "app.module.user.user_repository",
         ]
 
         for module_name in module_names:

@@ -1,19 +1,12 @@
 from typing import Any
 
-from sqlalchemy import update
-
-from app.core import db
-from app.module.notification import notification_stream
-from app.shared.model.notification import Notification
+from app.module.notification import notification_repository, notification_stream
 from app.shared.schemas.notification_schema import NotificationItem
 from app.shared.schemas.pagination_schema import NotificationPagination
 
 
 def create_notification(user_id: int, message: str) -> tuple[dict[str, Any], int]:
-    notification = Notification(user_id=user_id, message=message, is_read=False)
-    db.session.add(notification)
-    db.session.commit()
-
+    notification = notification_repository.create_notification(user_id, message)
     payload = _to_notification_payload(notification)
     print(
         f"[NOTI][create] notification_id={notification.id} user_id={user_id} message={message}",
@@ -25,13 +18,7 @@ def create_notification(user_id: int, message: str) -> tuple[dict[str, Any], int
 
 
 def list_notifications(user_id: int) -> tuple[dict[str, Any], int]:
-    notifications_query = (
-        Notification.query
-        .filter(Notification.user_id == user_id)
-        .order_by(Notification.created_at.desc())
-    )
-
-    notifications = notifications_query.all()
+    notifications = notification_repository.list_notifications(user_id)
     return {"data": [_to_notification_payload(item) for item in notifications]}, 200
 
 
@@ -40,21 +27,10 @@ def list_notifications_paginated(
     page: int,
     page_size: int,
 ) -> tuple[NotificationPagination[NotificationItem], int]:
-    notifications_query = (
-        Notification.query
-        .filter(Notification.user_id == user_id)
-        .order_by(Notification.created_at.desc(), Notification.id.desc())
-    )
-
-    total_elements = notifications_query.count()
-    total_pages = (total_elements + page_size - 1) // page_size if page_size > 0 else 0
-    offset = (page - 1) * page_size
-
-    notifications = (
-        notifications_query
-        .offset(offset)
-        .limit(page_size)
-        .all()
+    notifications, total_elements, total_pages = notification_repository.list_notifications_paginated(
+        user_id=user_id,
+        page=page,
+        page_size=page_size,
     )
 
     return NotificationPagination[NotificationItem](
@@ -68,26 +44,14 @@ def list_notifications_paginated(
 
 
 def get_unread_count(user_id: int) -> tuple[dict[str, int], int]:
-    unread_count = (
-        Notification.query
-        .filter(Notification.user_id == user_id, Notification.is_read.is_(False))
-        .count()
-    )
-
+    unread_count = notification_repository.get_unread_count(user_id)
     return {"userId": user_id, "unreadCount": unread_count}, 200
 
 
 def mark_as_read(notification_id: int, user_id: int) -> tuple[dict[str, Any], int]:
-    notification: Notification | None = Notification.query.filter_by(
-        id=notification_id,
-        user_id=user_id,
-    ).first()
+    notification = notification_repository.mark_notification_as_read(notification_id, user_id)
     if not notification:
         return {"error": "Notification not found"}, 404
-
-    if not notification.is_read:
-        notification.is_read = True
-        db.session.commit()
 
     return {
         "message": "Notification marked as read",
@@ -96,24 +60,11 @@ def mark_as_read(notification_id: int, user_id: int) -> tuple[dict[str, Any], in
 
 
 def mark_all_as_read(user_id: int) -> tuple[dict[str, Any], int]:
-    stmt = (
-        update(Notification)
-        .where(
-            Notification.user_id == user_id,
-            Notification.is_read.is_(False),
-        )
-        .values(is_read=True)
-    )
-    result = db.session.execute(stmt)
-    updated_count = int(result.rowcount or 0)
-
-    if updated_count > 0:
-        db.session.commit()
-
+    updated_count = notification_repository.mark_all_as_read(user_id)
     return {"message": "All notifications marked as read", "updatedCount": updated_count}, 200
 
 
-def _to_notification_payload(notification: Notification) -> dict[str, Any]:
+def _to_notification_payload(notification) -> dict[str, Any]:
     return {
         "id": notification.id,
         "userId": notification.user_id,

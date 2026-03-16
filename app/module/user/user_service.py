@@ -1,13 +1,7 @@
-from collections.abc import Iterable
-
-from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash
 
-from app.core import db
-from app.shared.model.permission import Permission
-from app.shared.model.user import User
-from app.shared.model.user_permission import UserPermission
+from app.module.user import user_repository
 from app.shared.schemas.pagination_schema import PaginatedResponse
 from app.shared.schemas.user_schema import (
     PermissionMatrixItem,
@@ -17,43 +11,16 @@ from app.shared.schemas.user_schema import (
     UserListQuery,
     UserUpdateRequest,
 )
-from app.shared.utils import pagination_utils
 
 ALLOWED_PERMISSION_ACTIONS = ("view", "create", "update", "delete", "approve")
 ACTION_ORDER = {action: idx for idx, action in enumerate(ALLOWED_PERMISSION_ACTIONS)}
 
 
 def query_users(query: UserListQuery):
-    q = User.query
-
-    # Search
-    q = pagination_utils.apply_search(q, query.search, [User.username, User.email])
-
-    # Filters
-    q = _apply_user_filters(q, query)
-
-    # Sort
-    field_map = {
-        "userId": User.user_id,
-        "username": User.username,
-        "email": User.email,
-        "isActive": User.is_active,
-        "createdAt": User.created_at,
-        "updatedAt": User.updated_at,
-    }
-    q = pagination_utils.apply_sorting(
-        q,
-        query.sortField or "updatedAt",
-        query.sortOrder or "desc",
-        field_map,
-        User.updated_at,
-    )
-
-    # Paginate
-    users, total, total_pages = pagination_utils.paginate(q, query.page, query.pageSize)
+    users, total, total_pages = user_repository.query_users(query)
 
     # Map
-    permission_count_map = _get_permission_count_map([user.user_id for user in users])
+    permission_count_map = user_repository.get_permission_count_map([user.user_id for user in users])
     data = [
         UserListItem(
             userId=user.user_id,
@@ -77,7 +44,7 @@ def query_users(query: UserListQuery):
 
 
 def get_user_detail(user_id: int):
-    user = User.query.filter_by(user_id=user_id).first()
+    user = user_repository.get_user_by_id(user_id, with_permissions=True)
     if not user:
         return {"error": "User not found"}, 404
     return _map_user_detail(user), 200
@@ -93,21 +60,17 @@ def create_user(req: UserCreateRequest):
     if len(password) < 8:
         return {"error": "Password must be at least 8 characters"}, 400
 
-    if User.query.filter_by(username=username).first():
+    if user_repository.username_exists(username):
         return {"error": "Username already exists"}, 409
 
-    user = User(
-        username=username,
-        email=email,
-        password_hash=_hash_password(password),
-        is_active=req.isActive,
-    )
-
     try:
-        db.session.add(user)
-        db.session.commit()
+        user = user_repository.create_user(
+            username=username,
+            email=email,
+            password_hash=_hash_password(password),
+            is_active=req.isActive,
+        )
     except IntegrityError as exc:
-        db.session.rollback()
         if _is_duplicate_username_error(exc):
             return {"error": "Username already exists"}, 409
         return {"error": "Failed to create user"}, 500
@@ -119,7 +82,7 @@ def create_user(req: UserCreateRequest):
 
 
 def update_user(user_id: int, req: UserUpdateRequest):
-    user = User.query.filter_by(user_id=user_id).first()
+    user = user_repository.get_user_by_id(user_id)
     if not user:
         return {"error": "User not found"}, 404
 
@@ -132,24 +95,18 @@ def update_user(user_id: int, req: UserUpdateRequest):
     if password and len(password) < 8:
         return {"error": "Password must be at least 8 characters"}, 400
 
-    duplicate = (
-        User.query
-        .filter(User.user_id != user_id, User.username == username)
-        .first()
-    )
-    if duplicate:
+    if user_repository.username_exists(username, exclude_user_id=user_id):
         return {"error": "Username already exists"}, 409
 
-    user.username = username
-    user.email = email
-    user.is_active = req.isActive
-    if password:
-        user.password_hash = _hash_password(password)
-
     try:
-        db.session.commit()
+        user = user_repository.update_user(
+            user,
+            username=username,
+            email=email,
+            is_active=req.isActive,
+            password_hash=_hash_password(password) if password else None,
+        )
     except IntegrityError as exc:
-        db.session.rollback()
         if _is_duplicate_username_error(exc):
             return {"error": "Username already exists"}, 409
         return {"error": "Failed to update user"}, 500
@@ -161,14 +118,7 @@ def update_user(user_id: int, req: UserUpdateRequest):
 
 
 def get_permission_matrix():
-    permissions = (
-        Permission.query
-        .filter(
-            Permission.is_active.is_(True),
-            Permission.action.in_(ALLOWED_PERMISSION_ACTIONS),
-        )
-        .all()
-    )
+    permissions = user_repository.get_active_permissions(ALLOWED_PERMISSION_ACTIONS)
 
     sorted_permissions = sorted(
         permissions,
@@ -192,11 +142,11 @@ def get_permission_matrix():
 
 
 def toggle_user_permission(user_id: int, permission_id: int, enabled: bool):
-    user = User.query.filter_by(user_id=user_id).first()
+    user = user_repository.get_user_by_id(user_id)
     if not user:
         return {"error": "User not found"}, 404
 
-    permission = Permission.query.filter_by(permission_id=permission_id).first()
+    permission = user_repository.get_permission_by_id(permission_id)
     if not permission:
         return {"error": "Permission not found"}, 404
 
@@ -204,20 +154,9 @@ def toggle_user_permission(user_id: int, permission_id: int, enabled: bool):
     if not permission.is_active or action not in ACTION_ORDER:
         return {"error": "Permission is not assignable"}, 400
 
-    link = UserPermission.query.filter_by(
-        user_id=user_id,
-        permission_id=permission_id,
-    ).first()
-
-    if enabled and not link:
-        db.session.add(UserPermission(user_id=user_id, permission_id=permission_id))
-    if not enabled and link:
-        db.session.delete(link)
-
     try:
-        db.session.commit()
+        user_repository.set_user_permission(user_id, permission_id, enabled)
     except IntegrityError:
-        db.session.rollback()
         return {"error": "Failed to update user permission"}, 500
 
     return {
@@ -230,21 +169,7 @@ def toggle_user_permission(user_id: int, permission_id: int, enabled: bool):
     }, 200
 
 
-def _get_permission_count_map(user_ids: Iterable[int]) -> dict[int, int]:
-    user_ids_list = list(user_ids)
-    if not user_ids_list:
-        return {}
-
-    rows = (
-        db.session.query(UserPermission.user_id, func.count(UserPermission.id))
-        .filter(UserPermission.user_id.in_(user_ids_list))
-        .group_by(UserPermission.user_id)
-        .all()
-    )
-    return {int(user_id): int(count) for user_id, count in rows}
-
-
-def _map_user_detail(user: User) -> UserDetail:
+def _map_user_detail(user) -> UserDetail:
     permission_ids = sorted(
         {
             user_permission.permission_id
@@ -260,12 +185,6 @@ def _map_user_detail(user: User) -> UserDetail:
         createdAt=_format_datetime(user.created_at),
         updatedAt=_format_datetime(user.updated_at),
     )
-
-
-def _apply_user_filters(q, query: UserListQuery):
-    if query.filters and query.filters.isActive is not None:
-        q = q.filter(User.is_active == query.filters.isActive)
-    return q
 
 
 def _format_datetime(value) -> str:

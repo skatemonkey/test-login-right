@@ -9,6 +9,7 @@ Read [../00-doc-catalog.md](../00-doc-catalog.md) first and [../01-overview.md](
 - Key files:
   - `app/module/auth/auth_routes.py`
   - `app/module/auth/auth_service.py`
+  - `app/module/auth/auth_repository.py`
   - `app/shared/schemas/auth_schema.py`
 
 ### `audit` (`app/module/audit`)
@@ -19,6 +20,7 @@ Read [../00-doc-catalog.md](../00-doc-catalog.md) first and [../01-overview.md](
 - Key files:
   - `app/module/audit/audit_routes.py`
   - `app/module/audit/audit_service.py`
+  - `app/module/audit/audit_repository.py`
   - `app/shared/schemas/audit_schema.py`
   - `app/shared/model/audit_log.py`
 
@@ -34,12 +36,14 @@ Read [../00-doc-catalog.md](../00-doc-catalog.md) first and [../01-overview.md](
 - Key files:
   - `app/module/notification/notification_routes.py`
   - `app/module/notification/notification_service.py`
+  - `app/module/notification/notification_repository.py`
   - `app/module/notification/notification_stream.py`
   - `app/shared/schemas/notification_schema.py`
   - `app/shared/model/notification.py`
 
 ### `line_chart` (`app/module/line_chart`)
 - Blueprint prefix: `/line-chart`
+- Current exception: non-SQL module; repository layer is not introduced in this phase.
 - Endpoints:
   - `POST /line-chart/history`
   - `GET /line-chart/stream` (SSE)
@@ -52,6 +56,7 @@ Read [../00-doc-catalog.md](../00-doc-catalog.md) first and [../01-overview.md](
 
 ### `table` (`app/module/table`)
 - Blueprint prefix: `/tables`
+- Current exception: route handlers call internal table display code directly; repository layer is not introduced in this phase.
 - Endpoints:
   - `GET /tables/layout/<table_id>`
   - `GET /tables/data/<table_id>`
@@ -68,6 +73,7 @@ Read [../00-doc-catalog.md](../00-doc-catalog.md) first and [../01-overview.md](
 - Key files:
   - `app/module/permission/permission_routes.py`
   - `app/module/permission/permission_service.py`
+  - `app/module/permission/permission_repository.py`
   - `app/shared/schemas/permission_schema.py`
   - `app/shared/model/permission.py`
 
@@ -83,6 +89,7 @@ Read [../00-doc-catalog.md](../00-doc-catalog.md) first and [../01-overview.md](
 - Key files:
   - `app/module/user/user_routes.py`
   - `app/module/user/user_service.py`
+  - `app/module/user/user_repository.py`
   - `app/shared/schemas/user_schema.py`
   - `app/shared/model/user.py`
   - `app/shared/model/user_permission.py`

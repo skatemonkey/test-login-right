@@ -5,7 +5,9 @@
 - 架构流向：
   - 结构：`core -> module -> shared`。
   - 依赖规则：较低层的功能层不得向上导入；`shared` 不得导入 `module`。
-  - 请求流：`routes -> services -> repositories`。
+  - 面向数据库的请求流：`routes -> services -> repositories`。
+- 面向数据库的 service 不得直接调用 `db.session`、ORM `.query`，也不得构造 SQLAlchemy 查询；query 构建、预加载和事务边界统一由 repository 负责。
+- `line_chart` 与 `table` 在本阶段保留当前非 SQL 结构，暂不强制纳入 repository 模式。
 - 日期时间输出保持 `%Y-%m-%d %H:%M:%S`；数据库默认时间戳使用 `app/shared/utils/time.py::now_utc0`。
 - 受保护接口使用 `@jwt_required()`；用户身份来自 `app/shared/utils/auth.py::current_user_id()`。
 - 导入风格：内部导入统一使用绝对路径（`from app...`），不要使用相对导入（`from .` / `from ..`）。

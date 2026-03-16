@@ -1,12 +1,12 @@
 from flask_jwt_extended import create_access_token
 from werkzeug.security import check_password_hash
 
-from app.shared.model.user import User
+from app.module.auth import auth_repository
 from app.shared.schemas.auth_schema import ErrorResponse, LoginRequest, LoginResponse
 
 
 def login(req: LoginRequest):
-    user = User.query.filter_by(username=req.username).first()
+    user = auth_repository.get_user_by_username(req.username)
     if not user or not _verify_password(req.password, user.password_hash):
         return ErrorResponse(error="Invalid credentials"), 401
 

@@ -32,11 +32,13 @@ pipenv run ruff check app tests
     - models：SQLAlchemy 表定义。
     - schemas：请求/响应模型（DTO）。
     - utilities：公共辅助函数。
-- 常见请求流向是 `routes -> services -> repositories`：
+- 面向数据库的模块常见请求流向是 `routes -> services -> repositories`：
   - `routes`：处理 HTTP、鉴权装饰器和响应组装。
   - `services`：承载业务逻辑。
   - `repositories`：负责数据库操作与查询。
-- 新功能放在 `app/module/<feature>/` 下。排查请求时，先看 route，再看对应 service 与 repository 依赖；`shared` 中的 models、schemas 和 utilities 作为辅助上下文查看。
+- 面向数据库的模块通常采用扁平三件套：`*_routes.py`、`*_service.py` 和 `*_repository.py`。
+- `line_chart` 与 `table` 在本阶段仍保留现有的非 SQL 结构，暂不纳入 repository 模式。
+- 新功能放在 `app/module/<feature>/` 下。排查数据库模块请求时，先看 route，再看对应 service 与 repository 依赖；`shared` 中的 models、schemas 和 utilities 作为辅助上下文查看。
 
 ### 文件结构
 ```text

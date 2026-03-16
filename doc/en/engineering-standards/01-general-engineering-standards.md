@@ -6,7 +6,9 @@ Read [00-eng-std-catalog.md](./00-eng-std-catalog.md) first and [../01-overview.
 - Architecture flow:
   - Structure: `core -> module -> shared`.
   - Dependency rule: lower feature layers must not import upward; `shared` must not import `module`.
-  - Request flow: `routes -> services -> repositories`.
+  - DB-backed request flow: `routes -> services -> repositories`.
+- DB-backed services must not call `db.session`, ORM `.query`, or build SQLAlchemy queries; repositories own query construction, eager loading, and transaction boundaries.
+- `line_chart` and `table` keep their current non-SQL structure in this phase and are not yet normalized to the repository pattern.
 - Datetime output stays `%Y-%m-%d %H:%M:%S`; DB timestamp defaults use `app/shared/utils/time.py::now_utc0`.
 - Protected endpoints use `@jwt_required()`; identity comes from `app/shared/utils/auth.py::current_user_id()`.
 - Import style: use absolute internal imports only (`from app...`), never relative imports (`from .` / `from ..`).

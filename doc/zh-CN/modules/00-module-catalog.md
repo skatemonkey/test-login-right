@@ -9,6 +9,7 @@
 - 关键文件：
   - `app/module/auth/auth_routes.py`
   - `app/module/auth/auth_service.py`
+  - `app/module/auth/auth_repository.py`
   - `app/shared/schemas/auth_schema.py`
 
 ### `audit` (`app/module/audit`)
@@ -19,6 +20,7 @@
 - 关键文件：
   - `app/module/audit/audit_routes.py`
   - `app/module/audit/audit_service.py`
+  - `app/module/audit/audit_repository.py`
   - `app/shared/schemas/audit_schema.py`
   - `app/shared/model/audit_log.py`
 
@@ -34,12 +36,14 @@
 - 关键文件：
   - `app/module/notification/notification_routes.py`
   - `app/module/notification/notification_service.py`
+  - `app/module/notification/notification_repository.py`
   - `app/module/notification/notification_stream.py`
   - `app/shared/schemas/notification_schema.py`
   - `app/shared/model/notification.py`
 
 ### `line_chart` (`app/module/line_chart`)
 - Blueprint 前缀：`/line-chart`
+- 当前例外：这是非 SQL 模块，本阶段不引入 repository 层。
 - 接口：
   - `POST /line-chart/history`
   - `GET /line-chart/stream` (SSE)
@@ -52,6 +56,7 @@
 
 ### `table` (`app/module/table`)
 - Blueprint 前缀：`/tables`
+- 当前例外：route 直接调用内部 table display 代码，本阶段不引入 repository 层。
 - 接口：
   - `GET /tables/layout/<table_id>`
   - `GET /tables/data/<table_id>`
@@ -68,6 +73,7 @@
 - 关键文件：
   - `app/module/permission/permission_routes.py`
   - `app/module/permission/permission_service.py`
+  - `app/module/permission/permission_repository.py`
   - `app/shared/schemas/permission_schema.py`
   - `app/shared/model/permission.py`
 
@@ -83,6 +89,7 @@
 - 关键文件：
   - `app/module/user/user_routes.py`
   - `app/module/user/user_service.py`
+  - `app/module/user/user_repository.py`
   - `app/shared/schemas/user_schema.py`
   - `app/shared/model/user.py`
   - `app/shared/model/user_permission.py`
