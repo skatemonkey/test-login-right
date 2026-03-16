@@ -5,7 +5,7 @@
 - 架构流向：
   - 结构：`core -> module -> shared`。
   - 依赖规则：较低层的功能层不得向上导入；`shared` 不得导入 `module`。
-  - 请求流：`routes -> services -> shared`。
+  - 请求流：`routes -> services -> repositories`。
 - 日期时间输出保持 `%Y-%m-%d %H:%M:%S`；数据库默认时间戳使用 `app/shared/utils/time.py::now_utc0`。
 - 受保护接口使用 `@jwt_required()`；用户身份来自 `app/shared/utils/auth.py::current_user_id()`。
 - 导入风格：内部导入统一使用绝对路径（`from app...`），不要使用相对导入（`from .` / `from ..`）。

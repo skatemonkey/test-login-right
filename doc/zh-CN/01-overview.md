@@ -28,12 +28,15 @@ pipenv run ruff check app tests
 - 仓库结构遵循 `core -> module -> shared`：
   - `core`：应用级基础设施与扩展初始化。
   - `module`：功能模块，例如 `auth`、`audit`、`notification`、`permission`、`user`、`table`、`line_chart`。
-  - `shared`：跨功能复用的 SQLAlchemy model、schema 和 utility。
-- 常见请求流向是 `routes -> services -> shared`：
+  - `shared`：
+    - models：SQLAlchemy 表定义。
+    - schemas：请求/响应模型（DTO）。
+    - utilities：公共辅助函数。
+- 常见请求流向是 `routes -> services -> repositories`：
   - `routes`：处理 HTTP、鉴权装饰器和响应组装。
   - `services`：承载业务逻辑。
-  - `shared`：提供 schema、model 和跨功能公共工具。
-- 新功能放在 `app/module/<feature>/` 下。排查请求时，先看 route，再看对应 service，最后看它依赖的 shared 部分。
+  - `repositories`：负责数据库操作与查询。
+- 新功能放在 `app/module/<feature>/` 下。排查请求时，先看 route，再看对应 service 与 repository 依赖；`shared` 中的 models、schemas 和 utilities 作为辅助上下文查看。
 
 ### 文件结构
 ```text
