@@ -3,8 +3,8 @@
 先读本目录中的 [00-eng-std-catalog.md](./00-eng-std-catalog.md) 和 [../01-overview.md](../01-overview.md)，再用本文件作为人类与 AI 共同遵循的编码规范基准。
 
 - 架构流向：
-  - 结构：`core -> module -> shared`。
-  - 依赖规则：较低层的功能层不得向上导入；`shared` 不得导入 `module`。
+  - 允许的依赖关系图：`app -> core`、`app -> module`、`module -> shared`、`module -> core`、`shared -> core`。
+  - 依赖规则：`shared` 不得导入 `module`；`core` 不得导入 `module`；bootstrap / composition 放在 `app`。
   - 面向数据库的请求流：`routes -> services -> repositories`。
 - 面向数据库的 service 不得直接调用 `db.session`、ORM `.query`，也不得构造 SQLAlchemy 查询；query 构建、预加载和事务边界统一由 repository 负责。
 - 日期时间输出保持 `%Y-%m-%d %H:%M:%S`；数据库默认时间戳使用 `app/shared/utils/time.py::now_utc0`。

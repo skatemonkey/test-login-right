@@ -25,13 +25,21 @@ pipenv run ruff check app tests
 
 ### 2.1 高层架构
 - `app.py` 用于启动服务，`app/__init__.py::create_app()` 负责加载配置、初始化 JWT、数据库、CORS 和 Redis，并注册各个 blueprint。
-- 仓库结构遵循 `core -> module -> shared`：
-  - `core`：应用级基础设施与扩展初始化。
+- 仓库按三个主要 package 区域组织：
+  - `core`：应用级基础设施、扩展初始化和基础设施客户端。
   - `module`：功能模块，例如 `auth`、`audit`、`notification`、`permission`、`user`、`table`、`line_chart`。
   - `shared`：
     - models：SQLAlchemy 表定义。
     - schemas：请求/响应模型（DTO）。
     - utilities：公共辅助函数。
+- 当前依赖关系图为：
+  ![Overview dependency graph](../-files/overview.png)
+  - `app -> core`
+  - `app -> module`
+  - `module -> shared`
+  - `module -> core`
+  - `shared -> core`
+
 - 面向数据库的模块常见请求流向是 `routes -> services -> repositories`：
   - `routes`：处理 HTTP、鉴权装饰器和响应组装。
   - `services`：承载业务逻辑。

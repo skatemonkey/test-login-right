@@ -4,8 +4,8 @@ Read [00-eng-std-catalog.md](./00-eng-std-catalog.md) first and [../01-overview.
 
 
 - Architecture flow:
-  - Structure: `core -> module -> shared`.
-  - Dependency rule: lower feature layers must not import upward; `shared` must not import `module`.
+  - Allowed dependency graph: `app -> core`, `app -> module`, `module -> shared`, `module -> core`, `shared -> core`.
+  - Dependency rule: `shared` must not import `module`; `core` must not import `module`; bootstrap/composition belongs in `app`.
   - DB-backed request flow: `routes -> services -> repositories`.
 - DB-backed services must not call `db.session`, ORM `.query`, or build SQLAlchemy queries; repositories own query construction, eager loading, and transaction boundaries.
 - Datetime output stays `%Y-%m-%d %H:%M:%S`; DB timestamp defaults use `app/shared/utils/time.py::now_utc0`.

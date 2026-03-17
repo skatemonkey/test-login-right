@@ -25,13 +25,21 @@ There is no separate build step. Install dependencies before running the app or 
 
 ### 2.1 High-level architecture
 - `app.py` starts the server, and `app/__init__.py::create_app()` loads config, initializes JWT, database, CORS, and Redis, then registers feature blueprints.
-- The repo follows `core -> module -> shared`:
-  - `core`: app-level infrastructure and extension setup
+- The repo is organized into three main package areas:
+  - `core`: app-level infrastructure, extension setup, and infra clients
   - `module`: feature packages such as `auth`, `audit`, `notification`, `permission`, `user`, `table`, and `line_chart`
   - `shared`:
     - models: SQLAlchemy table definitions
     - schemas: Request/Response models (DTOs)
     - utilities: common helper functions
+- The current dependency graph is:
+![Overview dependency graph](../-files/overview.png)
+  - `app -> core`
+  - `app -> module`
+  - `module -> shared`
+  - `module -> core`
+  - `shared -> core`
+
 - The common request path for DB-backed modules is `routes -> services -> repositories`:
   - `routes`: HTTP, auth decorators, and response shaping
   - `services`: business logic
