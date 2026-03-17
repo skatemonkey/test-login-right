@@ -37,7 +37,7 @@ There is no separate build step. Install dependencies before running the app or 
   - `services`: business logic
   - `repositories`: database operations and queries
 - DB-backed modules commonly use the flat trio `*_routes.py`, `*_service.py`, and `*_repository.py`.
-- `line_chart` and `table` remain current exceptions in this phase because they use non-SQL access patterns.
+- Architectural exceptions in this phase: `line_chart` and `table` use non-SQL access patterns and are not normalized to the repository pattern.
 - Add new features under `app/module/<feature>/`. To trace a DB-backed request, start at a route, then move to its service and repository dependencies; use `shared` models, schemas, and utilities as supporting context.
 
 ### 2.2 File Structure
