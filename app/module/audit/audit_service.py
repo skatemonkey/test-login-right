@@ -3,6 +3,7 @@ import json
 from app.module.audit import audit_repository
 from app.shared.schemas.audit_schema import AuditLogItem, AuditLogQuery, AuditLogRequest
 from app.shared.schemas.pagination_schema import PaginatedResponse
+from app.shared.utils import time as time_utils
 
 
 def create_log(req: AuditLogRequest, ip=str):
@@ -25,8 +26,7 @@ def create_log(req: AuditLogRequest, ip=str):
 def get_logs(query: AuditLogQuery):
     results, total, total_pages = audit_repository.query_logs(query)
 
-    # Map
-    data = [map_audit_log(log, username) for log, username in results]
+    data = [_map_audit_log(log, username) for log, username in results]
 
     return PaginatedResponse[AuditLogItem](
         data=data,
@@ -37,13 +37,13 @@ def get_logs(query: AuditLogQuery):
     ), 200
 
 
-def map_audit_log(log, username):
+def _map_audit_log(log, username):
     return AuditLogItem(
         id=log.id,
         username=username or "",
         ip=log.ip or "",
         device=log.device or "",
-        createdAt=log.created_at.strftime("%Y-%m-%d %H:%M:%S") if log.created_at else "",
+        createdAt=time_utils.format_datetime(log.created_at),
         module=log.module or "",
         action=log.action or "",
         details=log.details or "",

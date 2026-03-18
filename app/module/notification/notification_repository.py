@@ -1,6 +1,6 @@
 from sqlalchemy import update
 
-from app.core import db
+from app.core.db_ext import db
 from app.shared.model.notification import Notification
 from app.shared.utils import db_session_utils
 

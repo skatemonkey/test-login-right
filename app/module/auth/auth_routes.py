@@ -3,6 +3,7 @@ from flask_pydantic import validate
 
 from app.module.auth import auth_service
 from app.shared.schemas.auth_schema import LoginRequest
+from app.shared.utils import api_util
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -11,4 +12,4 @@ auth_bp = Blueprint("auth", __name__)
 @validate()
 def login(body: LoginRequest):
     result, status_code = auth_service.login(body)
-    return result.model_dump(), status_code
+    return api_util.json_response(result, status_code)

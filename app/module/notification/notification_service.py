@@ -3,6 +3,7 @@ from typing import Any
 from app.module.notification import notification_repository, notification_stream
 from app.shared.schemas.notification_schema import NotificationItem
 from app.shared.schemas.pagination_schema import NotificationPagination
+from app.shared.utils import time as time_utils
 
 
 def create_notification(user_id: int, message: str) -> tuple[dict[str, Any], int]:
@@ -70,5 +71,5 @@ def _to_notification_payload(notification) -> dict[str, Any]:
         "userId": notification.user_id,
         "message": notification.message,
         "isRead": bool(notification.is_read),
-        "createdAt": notification.created_at.strftime("%Y-%m-%d %H:%M:%S") if notification.created_at else "",
+        "createdAt": time_utils.format_datetime(notification.created_at),
     }

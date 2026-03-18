@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint
 from flask_jwt_extended import jwt_required
 from flask_pydantic import validate
 
@@ -8,6 +8,7 @@ from app.shared.schemas.permission_schema import (
     PermissionListQuery,
     PermissionUpdateRequest,
 )
+from app.shared.utils import api_util
 
 permission_bp = Blueprint("permission", __name__)
 
@@ -17,7 +18,7 @@ permission_bp = Blueprint("permission", __name__)
 @validate()
 def get_permissions(body: PermissionListQuery):
     result, status = permission_service.get_permissions(body)
-    return jsonify(result.model_dump()), status
+    return api_util.json_response(result, status)
 
 
 @permission_bp.post("")
@@ -25,7 +26,7 @@ def get_permissions(body: PermissionListQuery):
 @validate()
 def create_permission(body: PermissionCreateRequest):
     result, status = permission_service.create_permission(body)
-    return jsonify(result), status
+    return api_util.json_response(result, status)
 
 
 @permission_bp.put("/<int:permission_id>")
@@ -33,4 +34,4 @@ def create_permission(body: PermissionCreateRequest):
 @validate()
 def update_permission(permission_id: int, body: PermissionUpdateRequest):
     result, status = permission_service.update_permission(permission_id, body)
-    return jsonify(result), status
+    return api_util.json_response(result, status)

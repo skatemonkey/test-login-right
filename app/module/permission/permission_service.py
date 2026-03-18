@@ -8,13 +8,13 @@ from app.shared.schemas.permission_schema import (
     PermissionListQuery,
     PermissionUpdateRequest,
 )
+from app.shared.utils import time as time_utils
 
 
 def get_permissions(query: PermissionListQuery):
     results, total, total_pages = permission_repository.get_permissions(query)
 
-    # Map
-    data = [map_permission(permission) for permission in results]
+    data = [_map_permission(permission) for permission in results]
 
     return PaginatedResponse[PermissionItem](
         data=data,
@@ -25,15 +25,15 @@ def get_permissions(query: PermissionListQuery):
     ), 200
 
 
-def map_permission(permission):
+def _map_permission(permission):
     return PermissionItem(
         permissionId=permission.permission_id,
         module=permission.module or "",
         action=permission.action or "",
         description=permission.description,
         isActive=bool(permission.is_active),
-        createdAt=permission.created_at.strftime("%Y-%m-%d %H:%M:%S") if permission.created_at else "",
-        updatedAt=permission.updated_at.strftime("%Y-%m-%d %H:%M:%S") if permission.updated_at else "",
+        createdAt=time_utils.format_datetime(permission.created_at),
+        updatedAt=time_utils.format_datetime(permission.updated_at),
     )
 
 
@@ -60,7 +60,7 @@ def create_permission(body: PermissionCreateRequest):
 
     return {
         "message": "Permission created",
-        "data": map_permission(permission).model_dump(),
+        "data": _map_permission(permission).model_dump(),
     }, 201
 
 
@@ -97,5 +97,5 @@ def update_permission(permission_id: int, body: PermissionUpdateRequest):
 
     return {
         "message": "Permission updated",
-        "data": map_permission(permission).model_dump(),
+        "data": _map_permission(permission).model_dump(),
     }, 200

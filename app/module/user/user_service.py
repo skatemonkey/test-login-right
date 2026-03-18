@@ -11,6 +11,7 @@ from app.shared.schemas.user_schema import (
     UserListQuery,
     UserUpdateRequest,
 )
+from app.shared.utils import time as time_utils
 
 ALLOWED_PERMISSION_ACTIONS = ("view", "create", "update", "delete", "approve")
 ACTION_ORDER = {action: idx for idx, action in enumerate(ALLOWED_PERMISSION_ACTIONS)}
@@ -19,7 +20,6 @@ ACTION_ORDER = {action: idx for idx, action in enumerate(ALLOWED_PERMISSION_ACTI
 def query_users(query: UserListQuery):
     users, total, total_pages = user_repository.query_users(query)
 
-    # Map
     permission_count_map = user_repository.get_permission_count_map([user.user_id for user in users])
     data = [
         UserListItem(
@@ -28,8 +28,8 @@ def query_users(query: UserListQuery):
             email=user.email or "",
             isActive=bool(user.is_active),
             permissionCount=permission_count_map.get(user.user_id, 0),
-            createdAt=_format_datetime(user.created_at),
-            updatedAt=_format_datetime(user.updated_at),
+            createdAt=time_utils.format_datetime(user.created_at),
+            updatedAt=time_utils.format_datetime(user.updated_at),
         )
         for user in users
     ]
@@ -182,13 +182,9 @@ def _map_user_detail(user) -> UserDetail:
         email=user.email or "",
         isActive=bool(user.is_active),
         permissionIds=permission_ids,
-        createdAt=_format_datetime(user.created_at),
-        updatedAt=_format_datetime(user.updated_at),
+        createdAt=time_utils.format_datetime(user.created_at),
+        updatedAt=time_utils.format_datetime(user.updated_at),
     )
-
-
-def _format_datetime(value) -> str:
-    return value.strftime("%Y-%m-%d %H:%M:%S") if value else ""
 
 
 def _is_duplicate_username_error(exc: IntegrityError) -> bool:

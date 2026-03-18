@@ -2,12 +2,13 @@ from collections.abc import Generator
 import json
 from queue import Empty
 
-from flask import Blueprint, Response, jsonify, stream_with_context
+from flask import Blueprint, Response, stream_with_context
 from flask_jwt_extended import jwt_required
 from flask_pydantic import validate
 
 from app.module.line_chart import line_chart_service, line_chart_stream_service
 from app.shared.schemas.line_chart_schema import LineChartHistoryRequest, LineChartStreamQuery
+from app.shared.utils import api_util
 
 line_chart_bp = Blueprint("line_chart", __name__)
 
@@ -17,7 +18,7 @@ line_chart_bp = Blueprint("line_chart", __name__)
 @validate()
 def get_history(body: LineChartHistoryRequest):
     result, status = line_chart_service.fetch_history(body)
-    return _jsonify_result(result, status)
+    return api_util.json_response(result, status)
 
 
 @line_chart_bp.get("/stream")
@@ -47,13 +48,6 @@ def stream_updates(query: LineChartStreamQuery):
     response.headers["Connection"] = "keep-alive"
     response.headers["X-Accel-Buffering"] = "no"
     return response
-
-
-def _jsonify_result(result, status: int):
-    if hasattr(result, "model_dump"):
-        return jsonify(result.model_dump()), status
-    return jsonify(result), status
-
 
 def _to_sse(event: str, data: dict) -> str:
     return f"event: {event}\ndata: {json.dumps(data)}\n\n"

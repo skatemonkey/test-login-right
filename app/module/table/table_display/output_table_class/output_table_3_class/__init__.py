@@ -21,5 +21,5 @@ class OutputTable3:
             colCount=4
         )
 
-    from ..shared.convert_to_json_layout_3 import convert_to_json_layout
-    from ..shared.convert_to_json_data_3 import convert_to_json_data
+    from app.module.table.table_display.output_table_class.shared.convert_to_json_data_3 import convert_to_json_data
+    from app.module.table.table_display.output_table_class.shared.convert_to_json_layout_3 import convert_to_json_layout

@@ -1,4 +1,4 @@
-from app.core import db
+from app.core.db_ext import db
 from app.shared.model.permission import Permission
 from app.shared.schemas.permission_schema import PermissionFilters, PermissionListQuery
 from app.shared.utils import db_session_utils, pagination_utils

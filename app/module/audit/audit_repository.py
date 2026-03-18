@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from app.core import db
+from app.core.db_ext import db
 from app.shared.model.audit_log import AuditLog
 from app.shared.model.user import User
 from app.shared.schemas.audit_schema import AuditLogFilters, AuditLogQuery

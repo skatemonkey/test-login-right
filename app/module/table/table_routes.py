@@ -1,7 +1,8 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint
 from flask_jwt_extended import jwt_required
 
 from app.module.table.table_display.table_registry import TABLE_CLASSES
+from app.shared.utils import api_util
 
 table_bp = Blueprint("table", __name__)
 
@@ -11,8 +12,8 @@ table_bp = Blueprint("table", __name__)
 def get_table_layout(table_id: int):
     table_class = TABLE_CLASSES.get(table_id)
     if not table_class:
-        return jsonify({"error": "Invalid table_id"}), 404
-    return jsonify(table_class().convert_to_json_layout()), 200
+        return api_util.json_response({"error": "Invalid table_id"}, 404)
+    return api_util.json_response(table_class().convert_to_json_layout(), 200)
 
 
 @table_bp.get("/data/<int:table_id>")
@@ -20,5 +21,5 @@ def get_table_layout(table_id: int):
 def get_table_data(table_id: int):
     table_class = TABLE_CLASSES.get(table_id)
     if not table_class:
-        return jsonify({"error": "Invalid table_id"}), 404
-    return jsonify(table_class().convert_to_json_data()), 200
+        return api_util.json_response({"error": "Invalid table_id"}, 404)
+    return api_util.json_response(table_class().convert_to_json_data(), 200)

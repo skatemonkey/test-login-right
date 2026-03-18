@@ -1,4 +1,4 @@
-from app.core import db
+from app.core.db_ext import db
 
 
 def commit_session() -> None:

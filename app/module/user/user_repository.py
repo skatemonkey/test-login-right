@@ -3,7 +3,7 @@ from collections.abc import Iterable
 from sqlalchemy import func
 from sqlalchemy.orm import selectinload
 
-from app.core import db
+from app.core.db_ext import db
 from app.shared.model.permission import Permission
 from app.shared.model.user import User
 from app.shared.model.user_permission import UserPermission

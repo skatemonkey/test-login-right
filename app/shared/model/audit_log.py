@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import DateTime, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core import db
+from app.core.db_ext import db
 from app.shared.utils import time as time_utils
 
 
