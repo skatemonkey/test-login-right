@@ -43,14 +43,15 @@
 
 ## 4. `line_chart` (`app/module/line_chart`)
 - Blueprint 前缀：`/line-chart`
-- 当前例外：这是非 SQL 模块，本阶段不引入 repository 层。
+- 数据访问：这是基于 Redis 的模块，使用独立 repository 层处理 sorted set 历史查询与 pubsub 访问。
 - 接口：
   - `POST /line-chart/history`
   - `GET /line-chart/stream` (SSE)
 - 关键文件：
-  - `app/module/line_chart/routes/line_chart_routes.py`
-  - `app/module/line_chart/services/line_chart_service.py`
-  - `app/module/line_chart/services/line_chart_stream_service.py`
+  - `app/module/line_chart/line_chart_redis_repository.py`
+  - `app/module/line_chart/line_chart_routes.py`
+  - `app/module/line_chart/line_chart_service.py`
+  - `app/module/line_chart/line_chart_stream_service.py`
   - `app/shared/schemas/line_chart_schema.py`
   - `app/module/line_chart/pickle_test/long_running_program_demo.py`
 

@@ -1,7 +1,7 @@
 from queue import Empty
 import unittest
 
-from app.module.line_chart.services.line_chart_stream_service import LineChartStreamHub
+from app.module.line_chart.line_chart_stream_service import LineChartStreamHub
 
 
 class LineChartStreamServiceTestCase(unittest.TestCase):

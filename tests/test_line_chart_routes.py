@@ -5,8 +5,8 @@ from unittest.mock import Mock, patch
 from flask import Flask
 from flask_jwt_extended import JWTManager, create_access_token
 
-from app.module.line_chart.routes import line_chart_routes
-from app.module.line_chart.routes.line_chart_routes import line_chart_bp
+from app.module.line_chart import line_chart_routes
+from app.module.line_chart.line_chart_routes import line_chart_bp
 from app.shared.schemas.line_chart_schema import LineChartHistoryResponse, LineChartPoint, LineChartSeries
 
 

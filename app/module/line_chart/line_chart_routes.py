@@ -6,7 +6,7 @@ from flask import Blueprint, Response, jsonify, stream_with_context
 from flask_jwt_extended import jwt_required
 from flask_pydantic import validate
 
-from app.module.line_chart.services import line_chart_service, line_chart_stream_service
+from app.module.line_chart import line_chart_service, line_chart_stream_service
 from app.shared.schemas.line_chart_schema import LineChartHistoryRequest, LineChartStreamQuery
 
 line_chart_bp = Blueprint("line_chart", __name__)

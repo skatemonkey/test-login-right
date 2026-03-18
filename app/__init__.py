@@ -30,7 +30,7 @@ def create_app():
     app.register_blueprint(permission_bp, url_prefix="/permissions")
     from app.module.user.user_routes import user_bp
     app.register_blueprint(user_bp, url_prefix="/users")
-    from app.module.line_chart.routes.line_chart_routes import line_chart_bp
+    from app.module.line_chart.line_chart_routes import line_chart_bp
     app.register_blueprint(line_chart_bp, url_prefix="/line-chart")
 
     return app

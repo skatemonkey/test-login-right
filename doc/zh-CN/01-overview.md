@@ -45,8 +45,9 @@ pipenv run ruff check app tests
   - `services`：承载业务逻辑。
   - `repositories`：负责数据库操作与查询。
 - 面向数据库的模块通常采用扁平三件套：`*_routes.py`、`*_service.py` 和 `*_repository.py`。
-- 本阶段的架构例外是 `line_chart` 与 `table`：它们使用非 SQL 访问模式，暂不纳入 repository 模式。
-- 新功能放在 `app/module/<feature>/` 下。排查数据库模块请求时，先看 route，再看对应 service 与 repository 依赖；`shared` 中的 models、schemas 和 utilities 作为辅助上下文查看。
+- 基于 Redis 或其他非 SQL 数据源的模块，也应为原始基础设施访问提供独立的 repository / store 层；service 保持业务编排，route 不得直接访问 Redis。
+- 本阶段当前仍保留的架构例外是 `table`：它使用内部非 SQL 访问路径，暂未纳入 repository 模式。
+- 新功能放在 `app/module/<feature>/` 下。排查请求链路时，先看 route，再看对应 service 与 repository 或 store 依赖；`shared` 中的 models、schemas 和 utilities 作为辅助上下文查看。
 
 ### 2.2 文件结构
 ```text

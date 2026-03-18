@@ -2,7 +2,7 @@ import json
 import unittest
 from unittest.mock import Mock, patch
 
-from app.module.line_chart.services import line_chart_service
+from app.module.line_chart import line_chart_service
 from app.shared.schemas.line_chart_schema import LineChartHistoryRequest
 
 
@@ -14,7 +14,11 @@ class LineChartServiceTestCase(unittest.TestCase):
             json.dumps({"timestamp": 1710000005, "cpu": 22, "network": 125, "memory": 46}),
         ]
 
-        with patch.object(line_chart_service.redis_ext, "get_redis", return_value=redis_client):
+        with patch.object(
+            line_chart_service.line_chart_redis_repository,
+            "fetch_history_rows",
+            return_value=redis_client.zrangebyscore.return_value,
+        ) as fetch_history_rows:
             result, status = line_chart_service.fetch_history(
                 LineChartHistoryRequest(
                     start=1709999999,
@@ -45,6 +49,7 @@ class LineChartServiceTestCase(unittest.TestCase):
                 ],
             },
         )
+        fetch_history_rows.assert_called_once_with(1709999999, 1710000010)
 
     def test_fetch_history_tolerates_malformed_rows(self):
         redis_client = Mock()
@@ -55,7 +60,11 @@ class LineChartServiceTestCase(unittest.TestCase):
             json.dumps({"timestamp": 1710000005, "cpu": 18.5}),
         ]
 
-        with patch.object(line_chart_service.redis_ext, "get_redis", return_value=redis_client):
+        with patch.object(
+            line_chart_service.line_chart_redis_repository,
+            "fetch_history_rows",
+            return_value=redis_client.zrangebyscore.return_value,
+        ) as fetch_history_rows:
             result, status = line_chart_service.fetch_history(
                 LineChartHistoryRequest(
                     start=1710000000,
@@ -76,12 +85,17 @@ class LineChartServiceTestCase(unittest.TestCase):
                 ],
             },
         )
+        fetch_history_rows.assert_called_once_with(1710000000, 1710000010)
 
     def test_fetch_history_returns_empty_series_for_empty_window(self):
         redis_client = Mock()
         redis_client.zrangebyscore.return_value = []
 
-        with patch.object(line_chart_service.redis_ext, "get_redis", return_value=redis_client):
+        with patch.object(
+            line_chart_service.line_chart_redis_repository,
+            "fetch_history_rows",
+            return_value=redis_client.zrangebyscore.return_value,
+        ) as fetch_history_rows:
             result, status = line_chart_service.fetch_history(
                 LineChartHistoryRequest(start=1, end=2, series=["cpu", "network"]),
             )
@@ -96,6 +110,7 @@ class LineChartServiceTestCase(unittest.TestCase):
                 ],
             },
         )
+        fetch_history_rows.assert_called_once_with(1, 2)
 
     def test_fetch_history_rejects_invalid_time_range(self):
         result, status = line_chart_service.fetch_history(

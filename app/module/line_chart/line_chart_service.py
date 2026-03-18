@@ -1,15 +1,15 @@
 from collections.abc import Iterable
 import json
 
-from app.core import redis_ext
+from app.module.line_chart import line_chart_redis_repository
 from app.shared.schemas.line_chart_schema import (
     LineChartHistoryRequest,
     LineChartHistoryResponse,
     LineChartPoint,
     LineChartSeries,
 )
+from app.shared.utils import number_utils
 
-REDIS_KEY = "line_chart:points"
 DEFAULT_SERIES = ("cpu", "network", "memory")
 
 
@@ -18,8 +18,7 @@ def fetch_history(body: LineChartHistoryRequest):
         return {"error": "start must be less than or equal to end"}, 400
 
     selected_series = normalize_series(body.series)
-    redis_client = redis_ext.get_redis()
-    rows = redis_client.zrangebyscore(REDIS_KEY, body.start, body.end)
+    rows = line_chart_redis_repository.fetch_history_rows(body.start, body.end)
 
     points_by_series: dict[str, list[LineChartPoint]] = {
         series_name: []
@@ -31,12 +30,12 @@ def fetch_history(body: LineChartHistoryRequest):
         if not sample:
             continue
 
-        timestamp = _to_int(sample.get("timestamp"))
+        timestamp = number_utils.to_int_or_none(sample.get("timestamp"))
         if timestamp is None:
             continue
 
         for series_name in selected_series:
-            value = _to_float(sample.get(series_name))
+            value = number_utils.to_float_or_none(sample.get(series_name))
             if value is None:
                 continue
             points_by_series[series_name].append(
@@ -86,32 +85,3 @@ def _parse_sample(raw_row: str) -> dict | None:
         return None
 
     return payload
-
-
-def _to_int(value) -> int | None:
-    if isinstance(value, bool):
-        return None
-
-    if isinstance(value, int):
-        return value
-
-    if isinstance(value, float) and value.is_integer():
-        return int(value)
-
-    try:
-        return int(str(value))
-    except (TypeError, ValueError):
-        return None
-
-
-def _to_float(value) -> float | None:
-    if isinstance(value, bool):
-        return None
-
-    if isinstance(value, (int, float)):
-        return float(value)
-
-    try:
-        return float(str(value))
-    except (TypeError, ValueError):
-        return None

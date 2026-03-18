@@ -43,14 +43,15 @@ Read [../00-doc-catalog.md](../00-doc-catalog.md) first and [../01-overview.md](
 
 ## 4. `line_chart` (`app/module/line_chart`)
 - Blueprint prefix: `/line-chart`
-- Current exception: non-SQL module; repository layer is not introduced in this phase.
+- Data access: Redis-backed module with a dedicated repository layer for sorted-set history and pubsub access.
 - Endpoints:
   - `POST /line-chart/history`
   - `GET /line-chart/stream` (SSE)
 - Key files:
-  - `app/module/line_chart/routes/line_chart_routes.py`
-  - `app/module/line_chart/services/line_chart_service.py`
-  - `app/module/line_chart/services/line_chart_stream_service.py`
+  - `app/module/line_chart/line_chart_redis_repository.py`
+  - `app/module/line_chart/line_chart_routes.py`
+  - `app/module/line_chart/line_chart_service.py`
+  - `app/module/line_chart/line_chart_stream_service.py`
   - `app/shared/schemas/line_chart_schema.py`
   - `app/module/line_chart/pickle_test/long_running_program_demo.py`
 
