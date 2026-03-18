@@ -4,9 +4,10 @@ This file is the entry point for AI agents. All project knowledge for this repos
 
 Start with `doc/en/00-doc-catalog.md`.
 
-## 1. Task Context
+## 1. General Context
 
 * Use `doc/en/engineering-standards/00-eng-std-catalog.md` for implementation rules.
+* Use `doc/en/02-change-context-map.md` for task-oriented change navigation.
 * Use `doc/en/01-overview.md` for system-level context.
 * Use `doc/en/modules/00-module-catalog.md` for feature-specific entry points.
 * For documentation work, follow the rules below.
@@ -15,6 +16,7 @@ Start with `doc/en/00-doc-catalog.md`.
 
 * English is the source of truth for documentation.
 * When writing or modifying documentation, update `doc/en` first, then mirror it to `doc/zh-CN`.
+* `doc/en/02-change-context-map.md` and `doc/en/engineering-standards/01-general-engineering-standards.md` may remain flat lists for now.
 
 ### 2.1 Structure Rule
 
