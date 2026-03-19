@@ -259,7 +259,7 @@ class PermissionServiceTestCase(unittest.TestCase):
             result, status = permission_service.create_permission(body)
 
         self.assertEqual(status, 409)
-        self.assertEqual(result, {"error": "Permission already exists"})
+        self.assertEqual(result.model_dump(), {"error": "Permission already exists"})
 
     def test_update_permission_returns_conflict_on_integrity_error(self):
         body = PermissionUpdateRequest(module="user", action="edit", description=None, isActive=True)
@@ -283,7 +283,7 @@ class PermissionServiceTestCase(unittest.TestCase):
                     result, status = permission_service.update_permission(4, body)
 
         self.assertEqual(status, 409)
-        self.assertEqual(result, {"error": "Permission already exists"})
+        self.assertEqual(result.model_dump(), {"error": "Permission already exists"})
 
 
 class UserServiceTestCase(unittest.TestCase):
@@ -371,7 +371,7 @@ class UserServiceTestCase(unittest.TestCase):
             result, status = user_service.create_user(body)
 
         self.assertEqual(status, 409)
-        self.assertEqual(result, {"error": "Username already exists"})
+        self.assertEqual(result.model_dump(), {"error": "Username already exists"})
 
 
 if __name__ == "__main__":

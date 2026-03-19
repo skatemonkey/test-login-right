@@ -118,7 +118,7 @@ class LineChartServiceTestCase(unittest.TestCase):
         )
 
         self.assertEqual(status, 400)
-        self.assertEqual(result, {"error": "start must be less than or equal to end"})
+        self.assertEqual(result.model_dump(), {"error": "start must be less than or equal to end"})
 
 
 if __name__ == "__main__":
