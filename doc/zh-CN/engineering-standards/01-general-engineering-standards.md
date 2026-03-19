@@ -16,6 +16,9 @@
 - Barrel export 规则：不要通过 package 的 `__init__.py` 导入；应直接从具体模块路径导入。
   - 应当：`from app.shared.model.user import User`。
   - 不要：`from app.shared.model import User`。
+- 请求与响应的 payload 契约必须定义为明确的 model；不要在 route 或 service 中内联硬编码 payload 结构。
+  - 应当：`class LoginResponse(BaseModel): accessToken: str; userId: int`
+  - 不要：`return {"accessToken": token, "userId": user.id}`
 - 命名约定（项目特定）：
   - Pydantic / dataclass 字段：`camelCase`（例如 `userId`、`createdAt`、`pageSize`）。
   - 请求 / 响应 / 表格 JSON 的字段：`camelCase`。

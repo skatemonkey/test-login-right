@@ -17,6 +17,9 @@ Read [00-eng-std-catalog.md](./00-eng-std-catalog.md) first and [../01-overview.
 - Barrel export rule: do not import through package `__init__.py`; import from the concrete module path instead.
   - Do: `from app.shared.model.user import User`.
   - Don't: `from app.shared.model import User`.
+- Request and response payload contracts must be defined as explicit models; do not hardcode inline payload shapes in routes or services.
+  - Do: `class LoginResponse(BaseModel): accessToken: str; userId: int`
+  - Don't: `return {"accessToken": token, "userId": user.id}`
 - Naming conventions (project-specific):
   - Data-model fields (Pydantic/dataclass): `camelCase` (e.g., `userId`, `createdAt`, `pageSize`).
   - Wire payload keys (request/response/table JSON): `camelCase`.
