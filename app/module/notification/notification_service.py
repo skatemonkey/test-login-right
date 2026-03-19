@@ -19,11 +19,6 @@ def create_notification(user_id: int, message: str) -> tuple[dict[str, Any], int
     return {"message": "Notification sent", "notification": payload}, 201
 
 
-def list_notifications(user_id: int) -> tuple[dict[str, Any], int]:
-    notifications = notification_repository.list_notifications(user_id)
-    return {"data": [_to_notification_payload(item) for item in notifications]}, 200
-
-
 def list_notifications_paginated(
     user_id: int,
     page: int,

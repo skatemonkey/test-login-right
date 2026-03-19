@@ -11,15 +11,6 @@ def create_notification(user_id: int, message: str) -> Notification:
     return db_session_utils.commit_and_refresh(notification)
 
 
-def list_notifications(user_id: int) -> list[Notification]:
-    return (
-        Notification.query
-        .filter(Notification.user_id == user_id)
-        .order_by(Notification.created_at.desc())
-        .all()
-    )
-
-
 def list_notifications_paginated(
     user_id: int,
     page: int,
