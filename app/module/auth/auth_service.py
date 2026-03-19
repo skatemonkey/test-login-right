@@ -2,7 +2,8 @@ from flask_jwt_extended import create_access_token
 from werkzeug.security import check_password_hash
 
 from app.module.auth import auth_repository
-from app.shared.schemas.auth_schema import ErrorResponse, LoginRequest, LoginResponse
+from app.shared.schemas.api_response_schema import ErrorResponse
+from app.shared.schemas.auth_schema import LoginRequest, LoginResponse
 
 
 def login(req: LoginRequest):

@@ -1,6 +1,7 @@
 from typing import Any
 
 from app.module.notification import notification_repository, notification_stream
+from app.shared.schemas.api_response_schema import ErrorResponse
 from app.shared.schemas.notification_schema import NotificationItem
 from app.shared.schemas.pagination_schema import NotificationPagination
 from app.shared.utils import time as time_utils
@@ -49,10 +50,10 @@ def get_unread_count(user_id: int) -> tuple[dict[str, int], int]:
     return {"userId": user_id, "unreadCount": unread_count}, 200
 
 
-def mark_as_read(notification_id: int, user_id: int) -> tuple[dict[str, Any], int]:
+def mark_as_read(notification_id: int, user_id: int) -> tuple[dict[str, Any] | ErrorResponse, int]:
     notification = notification_repository.mark_notification_as_read(notification_id, user_id)
     if not notification:
-        return {"error": "Notification not found"}, 404
+        return ErrorResponse(error="Notification not found"), 404
 
     return {
         "message": "Notification marked as read",

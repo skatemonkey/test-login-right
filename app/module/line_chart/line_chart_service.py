@@ -2,6 +2,7 @@ from collections.abc import Iterable
 import json
 
 from app.module.line_chart import line_chart_redis_repository
+from app.shared.schemas.api_response_schema import ErrorResponse
 from app.shared.schemas.line_chart_schema import (
     LineChartHistoryRequest,
     LineChartHistoryResponse,
@@ -15,7 +16,7 @@ DEFAULT_SERIES = ("cpu", "network", "memory")
 
 def fetch_history(body: LineChartHistoryRequest):
     if body.start > body.end:
-        return {"error": "start must be less than or equal to end"}, 400
+        return ErrorResponse(error="start must be less than or equal to end"), 400
 
     selected_series = normalize_series(body.series)
     rows = line_chart_redis_repository.fetch_history_rows(body.start, body.end)

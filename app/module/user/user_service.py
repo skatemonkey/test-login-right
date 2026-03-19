@@ -2,6 +2,7 @@ from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash
 
 from app.module.user import user_repository
+from app.shared.schemas.api_response_schema import ErrorResponse
 from app.shared.schemas.pagination_schema import PaginatedResponse
 from app.shared.schemas.user_schema import (
     PermissionMatrixItem,
@@ -46,7 +47,7 @@ def query_users(query: UserListQuery):
 def get_user_detail(user_id: int):
     user = user_repository.get_user_by_id(user_id, with_permissions=True)
     if not user:
-        return {"error": "User not found"}, 404
+        return ErrorResponse(error="User not found"), 404
     return _map_user_detail(user), 200
 
 
@@ -56,12 +57,12 @@ def create_user(req: UserCreateRequest):
     password = req.password
 
     if not username or not email or not password:
-        return {"error": "Username, email, and password are required"}, 400
+        return ErrorResponse(error="Username, email, and password are required"), 400
     if len(password) < 8:
-        return {"error": "Password must be at least 8 characters"}, 400
+        return ErrorResponse(error="Password must be at least 8 characters"), 400
 
     if user_repository.username_exists(username):
-        return {"error": "Username already exists"}, 409
+        return ErrorResponse(error="Username already exists"), 409
 
     try:
         user = user_repository.create_user(
@@ -72,8 +73,8 @@ def create_user(req: UserCreateRequest):
         )
     except IntegrityError as exc:
         if _is_duplicate_username_error(exc):
-            return {"error": "Username already exists"}, 409
-        return {"error": "Failed to create user"}, 500
+            return ErrorResponse(error="Username already exists"), 409
+        return ErrorResponse(error="Failed to create user"), 500
 
     return {
         "message": "User created",
@@ -84,19 +85,19 @@ def create_user(req: UserCreateRequest):
 def update_user(user_id: int, req: UserUpdateRequest):
     user = user_repository.get_user_by_id(user_id)
     if not user:
-        return {"error": "User not found"}, 404
+        return ErrorResponse(error="User not found"), 404
 
     username = req.username
     email = req.email
     password = req.password or ""
 
     if not username or not email:
-        return {"error": "Username and email are required"}, 400
+        return ErrorResponse(error="Username and email are required"), 400
     if password and len(password) < 8:
-        return {"error": "Password must be at least 8 characters"}, 400
+        return ErrorResponse(error="Password must be at least 8 characters"), 400
 
     if user_repository.username_exists(username, exclude_user_id=user_id):
-        return {"error": "Username already exists"}, 409
+        return ErrorResponse(error="Username already exists"), 409
 
     try:
         user = user_repository.update_user(
@@ -108,8 +109,8 @@ def update_user(user_id: int, req: UserUpdateRequest):
         )
     except IntegrityError as exc:
         if _is_duplicate_username_error(exc):
-            return {"error": "Username already exists"}, 409
-        return {"error": "Failed to update user"}, 500
+            return ErrorResponse(error="Username already exists"), 409
+        return ErrorResponse(error="Failed to update user"), 500
 
     return {
         "message": "User updated",
@@ -144,20 +145,20 @@ def get_permission_matrix():
 def toggle_user_permission(user_id: int, permission_id: int, enabled: bool):
     user = user_repository.get_user_by_id(user_id)
     if not user:
-        return {"error": "User not found"}, 404
+        return ErrorResponse(error="User not found"), 404
 
     permission = user_repository.get_permission_by_id(permission_id)
     if not permission:
-        return {"error": "Permission not found"}, 404
+        return ErrorResponse(error="Permission not found"), 404
 
     action = (permission.action or "").lower()
     if not permission.is_active or action not in ACTION_ORDER:
-        return {"error": "Permission is not assignable"}, 400
+        return ErrorResponse(error="Permission is not assignable"), 400
 
     try:
         user_repository.set_user_permission(user_id, permission_id, enabled)
     except IntegrityError:
-        return {"error": "Failed to update user permission"}, 500
+        return ErrorResponse(error="Failed to update user permission"), 500
 
     return {
         "message": "User permission updated",

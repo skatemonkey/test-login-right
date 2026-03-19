@@ -1,6 +1,7 @@
 from sqlalchemy.exc import IntegrityError
 
 from app.module.permission import permission_repository
+from app.shared.schemas.api_response_schema import ErrorResponse
 from app.shared.schemas.pagination_schema import PaginatedResponse
 from app.shared.schemas.permission_schema import (
     PermissionCreateRequest,
@@ -43,10 +44,10 @@ def create_permission(body: PermissionCreateRequest):
     description = body.description
 
     if not module or not action:
-        return {"error": "Module and action are required"}, 400
+        return ErrorResponse(error="Module and action are required"), 400
 
     if permission_repository.get_permission_by_module_and_action(module, action):
-        return {"error": "Permission already exists"}, 409
+        return ErrorResponse(error="Permission already exists"), 409
 
     try:
         permission = permission_repository.create_permission(
@@ -56,7 +57,7 @@ def create_permission(body: PermissionCreateRequest):
             is_active=body.isActive,
         )
     except IntegrityError:
-        return {"error": "Permission already exists"}, 409
+        return ErrorResponse(error="Permission already exists"), 409
 
     return {
         "message": "Permission created",
@@ -67,14 +68,14 @@ def create_permission(body: PermissionCreateRequest):
 def update_permission(permission_id: int, body: PermissionUpdateRequest):
     permission = permission_repository.get_permission_by_id(permission_id)
     if not permission:
-        return {"error": "Permission not found"}, 404
+        return ErrorResponse(error="Permission not found"), 404
 
     module = body.module
     action = body.action
     description = body.description
 
     if not module or not action:
-        return {"error": "Module and action are required"}, 400
+        return ErrorResponse(error="Module and action are required"), 400
 
     duplicate = permission_repository.get_permission_by_module_and_action(
         module,
@@ -82,7 +83,7 @@ def update_permission(permission_id: int, body: PermissionUpdateRequest):
         exclude_permission_id=permission_id,
     )
     if duplicate:
-        return {"error": "Permission already exists"}, 409
+        return ErrorResponse(error="Permission already exists"), 409
 
     try:
         permission = permission_repository.update_permission(
@@ -93,7 +94,7 @@ def update_permission(permission_id: int, body: PermissionUpdateRequest):
             is_active=body.isActive,
         )
     except IntegrityError:
-        return {"error": "Permission already exists"}, 409
+        return ErrorResponse(error="Permission already exists"), 409
 
     return {
         "message": "Permission updated",

@@ -11,7 +11,3 @@ class LoginResponse(BaseModel):
     username: str
     accessToken: str
     permissions: list[str]
-
-
-class ErrorResponse(BaseModel):
-    error: str
