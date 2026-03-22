@@ -10,7 +10,6 @@ class AuditLogRequest(BaseModel):
     module: str
     action: str
     device: str
-    ip: str
     details: Optional[Union[str, dict]] = None
 
 

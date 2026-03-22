@@ -6,14 +6,14 @@ from app.shared.schemas.pagination_schema import PaginatedResponse
 from app.shared.utils import time as time_utils
 
 
-def create_log(req: AuditLogRequest):
+def create_log(req: AuditLogRequest, ip=str):
     details = req.details
     if isinstance(details, dict):
         details = json.dumps(details)
 
     audit_repository.create_log(
         user_id=req.userId,
-        ip=req.ip,
+        ip=ip,
         module=req.module,
         action=req.action,
         device=req.device,

@@ -12,8 +12,7 @@ audit_bp = Blueprint("audit", __name__)
 @audit_bp.post("/log")
 @validate()
 def create_log(body: AuditLogRequest):
-    body.ip = request.remote_addr
-    result, status = audit_service.create_log(body)
+    result, status = audit_service.create_log(body, ip=request.remote_addr)
     return api_util.model_response(result, status)
 
 
