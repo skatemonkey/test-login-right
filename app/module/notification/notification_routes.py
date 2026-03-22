@@ -1,5 +1,4 @@
 from collections.abc import Generator
-import json
 from queue import Empty
 
 from flask import Blueprint, Response, stream_with_context
@@ -7,8 +6,14 @@ from flask_jwt_extended import jwt_required
 from flask_pydantic import validate
 
 from app.module.notification import notification_service, notification_stream
-from app.shared.schemas.notification_schema import MockApproveRequest, NotificationListQuery
+from app.shared.schemas.notification_schema import (
+    MockApproveRequest,
+    NotificationListQuery,
+    NotificationSseEvent,
+)
+from app.shared.schemas.sse_schema import SseConnectedPayload
 from app.shared.utils import api_util, auth as auth_utils
+from app.shared.utils.sse_util import to_sse
 
 notification_bp = Blueprint("notification", __name__)
 
@@ -67,7 +72,10 @@ def stream_notifications():
     @stream_with_context
     def event_stream() -> Generator[str, None, None]:
         try:
-            yield _to_sse(event="connected", data={"message": "connected"})
+            yield to_sse(
+                event="connected",
+                data=SseConnectedPayload(message="connected"),
+            )
             while True:
                 try:
                     payload = event_queue.get(timeout=20)
@@ -75,7 +83,10 @@ def stream_notifications():
                         f"[SSE][send] user_id={user_id} connection_id={connection_id} payload={payload}",
                         flush=True,
                     )
-                    yield _to_sse(event="notification", data=payload)
+                    yield to_sse(
+                        event="notification",
+                        data=NotificationSseEvent.model_validate(payload),
+                    )
                 except Empty:
                     print(
                         f"[SSE][ping] user_id={user_id} connection_id={connection_id}",
@@ -116,6 +127,3 @@ def mock_approve(body: MockApproveRequest):
         "itemId": body.itemId,
         "notification": created["notification"],
     }, status)
-
-def _to_sse(event: str, data: dict) -> str:
-    return f"event: {event}\ndata: {json.dumps(data)}\n\n"

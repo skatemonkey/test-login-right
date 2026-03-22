@@ -1,4 +1,5 @@
-from queue import Queue
+import json
+from queue import Empty, Queue
 import unittest
 from unittest.mock import Mock, patch
 
@@ -7,10 +8,20 @@ from flask_jwt_extended import JWTManager, create_access_token
 
 from app.module.line_chart import line_chart_routes
 from app.module.line_chart.line_chart_routes import line_chart_bp
-from app.shared.schemas.line_chart_schema import LineChartHistoryResponse, LineChartPoint, LineChartSeries
+from app.shared.schemas.line_chart_schema import (
+    LineChartHistoryResponse,
+    LineChartPoint,
+    LineChartSeries,
+    LineChartSsePoint,
+)
+from app.shared.schemas.sse_schema import SseConnectedPayload
 
 
 class LineChartRoutesTestCase(unittest.TestCase):
+    @staticmethod
+    def _sse_data(chunk: str) -> dict:
+        return json.loads(chunk.split("data: ", 1)[1].strip())
+
     def setUp(self):
         self.app = Flask(__name__)
         self.app.config["TESTING"] = True
@@ -84,15 +95,45 @@ class LineChartRoutesTestCase(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn("event: connected\n", connected_chunk)
-        self.assertIn("\ndata: ", connected_chunk)
         self.assertTrue(connected_chunk.endswith("\n\n"))
-        self.assertNotIn("\\ndata:", connected_chunk)
         self.assertIn("event: point\n", point_chunk)
-        self.assertIn("\ndata: ", point_chunk)
         self.assertTrue(point_chunk.endswith("\n\n"))
-        self.assertNotIn("\\ndata:", point_chunk)
-        self.assertIn('"timestamp": 1710000000', point_chunk)
+        self.assertEqual(
+            self._sse_data(connected_chunk),
+            SseConnectedPayload(message="connected").model_dump(),
+        )
+        self.assertEqual(
+            self._sse_data(point_chunk),
+            LineChartSsePoint(
+                timestamp=1710000000,
+                values={"cpu": 42.0},
+            ).model_dump(),
+        )
         fake_hub.subscribe.assert_called_once_with(["cpu", "memory"])
+        fake_hub.ensure_listener_started.assert_called_once_with()
+        fake_hub.unsubscribe.assert_called_once_with("conn-1")
+
+    def test_stream_route_keeps_ping_as_comment(self):
+        event_queue = Mock()
+        event_queue.get.side_effect = Empty()
+
+        fake_hub = Mock()
+        fake_hub.subscribe.return_value = ("conn-1", event_queue)
+
+        with patch.object(line_chart_routes.line_chart_stream_service, "line_chart_stream_hub", fake_hub):
+            response = self.client.get(
+                "/line-chart/stream?series=cpu",
+                headers=self.auth_headers,
+                buffered=False,
+            )
+
+            stream = iter(response.response)
+            next(stream)
+            ping_chunk = next(stream).decode("utf-8")
+            response.close()
+
+        self.assertEqual(ping_chunk, ": ping\n\n")
+        fake_hub.subscribe.assert_called_once_with(["cpu"])
         fake_hub.ensure_listener_started.assert_called_once_with()
         fake_hub.unsubscribe.assert_called_once_with("conn-1")
 

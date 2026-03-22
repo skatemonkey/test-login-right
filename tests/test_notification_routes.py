@@ -1,15 +1,26 @@
+import json
+from queue import Empty, Queue
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from flask import Flask
 from flask_jwt_extended import JWTManager, create_access_token
 
+from app.module.notification import notification_routes
 from app.module.notification.notification_routes import notification_bp
 from app.shared.schemas.api_response_schema import ErrorResponse
-from app.shared.schemas.notification_schema import NotificationUnreadCountResponse
+from app.shared.schemas.notification_schema import (
+    NotificationSseEvent,
+    NotificationUnreadCountResponse,
+)
+from app.shared.schemas.sse_schema import SseConnectedPayload
 
 
 class NotificationRoutesTestCase(unittest.TestCase):
+    @staticmethod
+    def _sse_data(chunk: str) -> dict:
+        return json.loads(chunk.split("data: ", 1)[1].strip())
+
     def setUp(self):
         self.app = Flask(__name__)
         self.app.config["TESTING"] = True
@@ -88,6 +99,82 @@ class NotificationRoutesTestCase(unittest.TestCase):
             },
         )
         get_unread_count.assert_called_once_with(1)
+
+    def test_stream_notifications_emits_connected_and_notification_event(self):
+        event_queue: Queue = Queue()
+        event_queue.put(
+            {
+                "type": "notification.created",
+                "notification": {
+                    "id": 7,
+                    "userId": 1,
+                    "message": "approved",
+                    "isRead": False,
+                    "createdAt": "2024-02-03 04:05:06",
+                },
+            },
+        )
+
+        fake_hub = Mock()
+        fake_hub.subscribe.return_value = ("conn-1", event_queue)
+
+        with patch.object(notification_routes, "notification_stream") as notification_stream:
+            notification_stream.notification_hub = fake_hub
+            response = self.client.get(
+                "/notifications/stream",
+                headers=self.auth_headers,
+                buffered=False,
+            )
+
+            stream = iter(response.response)
+            connected_chunk = next(stream).decode("utf-8")
+            notification_chunk = next(stream).decode("utf-8")
+            response.close()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            self._sse_data(connected_chunk),
+            SseConnectedPayload(message="connected").model_dump(),
+        )
+        self.assertEqual(
+            self._sse_data(notification_chunk),
+            NotificationSseEvent(
+                type="notification.created",
+                notification={
+                    "id": 7,
+                    "userId": 1,
+                    "message": "approved",
+                    "isRead": False,
+                    "createdAt": "2024-02-03 04:05:06",
+                },
+            ).model_dump(),
+        )
+        fake_hub.subscribe.assert_called_once_with(1)
+        fake_hub.unsubscribe.assert_called_once_with(1, "conn-1")
+
+    def test_stream_notifications_keeps_ping_as_comment(self):
+        event_queue = Mock()
+        event_queue.get.side_effect = Empty()
+
+        fake_hub = Mock()
+        fake_hub.subscribe.return_value = ("conn-1", event_queue)
+
+        with patch.object(notification_routes, "notification_stream") as notification_stream:
+            notification_stream.notification_hub = fake_hub
+            response = self.client.get(
+                "/notifications/stream",
+                headers=self.auth_headers,
+                buffered=False,
+            )
+
+            stream = iter(response.response)
+            next(stream)
+            ping_chunk = next(stream).decode("utf-8")
+            response.close()
+
+        self.assertEqual(ping_chunk, ": ping\n\n")
+        fake_hub.subscribe.assert_called_once_with(1)
+        fake_hub.unsubscribe.assert_called_once_with(1, "conn-1")
 
 
 if __name__ == "__main__":

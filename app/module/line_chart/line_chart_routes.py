@@ -1,5 +1,4 @@
 from collections.abc import Generator
-import json
 from queue import Empty
 
 from flask import Blueprint, Response, stream_with_context
@@ -7,8 +6,14 @@ from flask_jwt_extended import jwt_required
 from flask_pydantic import validate
 
 from app.module.line_chart import line_chart_service, line_chart_stream_service
-from app.shared.schemas.line_chart_schema import LineChartHistoryRequest, LineChartStreamQuery
+from app.shared.schemas.line_chart_schema import (
+    LineChartHistoryRequest,
+    LineChartSsePoint,
+    LineChartStreamQuery,
+)
+from app.shared.schemas.sse_schema import SseConnectedPayload
 from app.shared.utils import api_util
+from app.shared.utils.sse_util import to_sse
 
 line_chart_bp = Blueprint("line_chart", __name__)
 
@@ -32,12 +37,18 @@ def stream_updates(query: LineChartStreamQuery):
     @stream_with_context
     def event_stream() -> Generator[str, None, None]:
         try:
-            yield _to_sse(event="connected", data={"message": "connected"})
+            yield to_sse(
+                event="connected",
+                data=SseConnectedPayload(message="connected"),
+            )
 
             while True:
                 try:
                     payload = event_queue.get(timeout=20)
-                    yield _to_sse(event="point", data=payload)
+                    yield to_sse(
+                        event="point",
+                        data=LineChartSsePoint.model_validate(payload),
+                    )
                 except Empty:
                     yield ": ping\n\n"
         finally:
@@ -48,6 +59,3 @@ def stream_updates(query: LineChartStreamQuery):
     response.headers["Connection"] = "keep-alive"
     response.headers["X-Accel-Buffering"] = "no"
     return response
-
-def _to_sse(event: str, data: dict) -> str:
-    return f"event: {event}\ndata: {json.dumps(data)}\n\n"

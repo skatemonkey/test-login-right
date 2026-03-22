@@ -19,6 +19,11 @@ class NotificationItem(BaseModel):
     createdAt: str
 
 
+class NotificationSseEvent(BaseModel):
+    type: str
+    notification: NotificationItem
+
+
 class NotificationUnreadCountResponse(BaseModel):
     userId: int
     unreadCount: int
