@@ -8,6 +8,7 @@ from flask_pydantic import validate
 from app.module.notification import notification_service, notification_stream
 from app.shared.schemas.notification_schema import (
     MockApproveRequest,
+    MockApproveResponse,
     NotificationListQuery,
     NotificationSseEvent,
 )
@@ -116,10 +117,13 @@ def mock_approve(body: MockApproveRequest):
         message=message,
     )
 
-    return api_util.api_response({
-        "message": "Approve action mocked and notification sent",
-        "approverUserId": approver_user_id,
-        "targetUserId": body.targetUserId,
-        "itemId": body.itemId,
-        "notification": created["notification"],
-    }, status)
+    return api_util.api_response(
+        MockApproveResponse(
+            message="Approve action mocked and notification sent",
+            approverUserId=approver_user_id,
+            targetUserId=body.targetUserId,
+            itemId=body.itemId,
+            notification=created["notification"],
+        ),
+        status,
+    )

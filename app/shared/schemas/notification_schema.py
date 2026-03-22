@@ -19,6 +19,14 @@ class NotificationItem(BaseModel):
     createdAt: str
 
 
+class MockApproveResponse(BaseModel):
+    message: str
+    approverUserId: int
+    targetUserId: int
+    itemId: int | None = None
+    notification: NotificationItem
+
+
 class NotificationSseEvent(BaseModel):
     type: str
     notification: NotificationItem

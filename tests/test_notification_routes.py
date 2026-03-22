@@ -10,6 +10,7 @@ from app.module.notification import notification_routes
 from app.module.notification.notification_routes import notification_bp
 from app.shared.schemas.api_response_schema import ErrorResponse
 from app.shared.schemas.notification_schema import (
+    MockApproveResponse,
     NotificationSseEvent,
     NotificationUnreadCountResponse,
 )
@@ -99,6 +100,44 @@ class NotificationRoutesTestCase(unittest.TestCase):
             },
         )
         get_unread_count.assert_called_once_with(1)
+
+    def test_mock_approve_returns_response_model_payload(self):
+        created = {
+            "message": "Notification sent",
+            "notification": {
+                "id": 7,
+                "userId": 5,
+                "message": "Item 42 was approved by user 1.",
+                "isRead": False,
+                "createdAt": "2024-02-03 04:05:06",
+            },
+        }
+
+        with patch(
+            "app.module.notification.notification_routes.notification_service.create_notification",
+            return_value=(created, 201),
+        ) as create_notification:
+            response = self.client.post(
+                "/notifications/mock-approve",
+                headers=self.auth_headers,
+                json={"targetUserId": 5, "itemId": 42},
+            )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(
+            response.get_json(),
+            MockApproveResponse(
+                message="Approve action mocked and notification sent",
+                approverUserId=1,
+                targetUserId=5,
+                itemId=42,
+                notification=created["notification"],
+            ).model_dump(),
+        )
+        create_notification.assert_called_once_with(
+            user_id=5,
+            message="Item 42 was approved by user 1.",
+        )
 
     def test_stream_notifications_emits_connected_and_notification_event(self):
         event_queue: Queue = Queue()
