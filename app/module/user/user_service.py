@@ -1,3 +1,5 @@
+import json
+
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash
 
@@ -176,14 +178,27 @@ def toggle_user_permission(user_id: int, permission_id: int, enabled: bool):
     if not permission:
         return ErrorResponse(error="Permission not found"), 404
 
-    action = (permission.action or "").lower()
-    if not permission.is_active or action not in ACTION_ORDER:
+    permission_action = (permission.action or "").lower()
+    if not permission.is_active or permission_action not in ACTION_ORDER:
         return ErrorResponse(error="Permission is not assignable"), 400
 
     try:
         user_repository.set_user_permission(user_id, permission_id, enabled)
     except IntegrityError:
         return ErrorResponse(error="Failed to update user permission"), 500
+
+    audit_service.create_log_internal(
+        user_id=auth_utils.current_user_id(),
+        module="user",
+        action="permission.update",
+        details=f"user {user_id} permission updated: {json.dumps({
+            'userId': user_id,
+            'permissionId': permission_id,
+            'module': permission.module or '',
+            'action': permission_action,
+            'enabled': enabled,
+        })}",
+    )
 
     return MsgCodeDataResponse[UserPermissionToggleResult](
         msgCode="user.permission.updated",

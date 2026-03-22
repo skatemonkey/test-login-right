@@ -394,7 +394,9 @@ class PermissionServiceTestCase(unittest.TestCase):
                 "create_permission",
                 return_value=permission,
             ):
-                result, status = permission_service.create_permission(body)
+                with patch.object(permission_service.auth_utils, "current_user_id", return_value=99):
+                    with patch.object(permission_service.audit_service, "create_log_internal") as create_log_internal:
+                        result, status = permission_service.create_permission(body)
 
         self.assertEqual(status, 201)
         self.assertEqual(
@@ -412,10 +414,28 @@ class PermissionServiceTestCase(unittest.TestCase):
                 },
             },
         )
+        create_log_internal.assert_called_once_with(
+            user_id=99,
+            module="permission",
+            action="create",
+            details=(
+                'permission 4 created: '
+                '{"permissionId":4,"module":"user","action":"view","description":"Can view",'
+                '"isActive":true,"createdAt":"2024-04-05 06:07:08","updatedAt":"2024-04-05 06:07:09"}'
+            ),
+        )
 
     def test_update_permission_returns_conflict_on_integrity_error(self):
         body = PermissionUpdateRequest(module="user", action="edit", description=None, isActive=True)
-        permission = SimpleNamespace()
+        permission = SimpleNamespace(
+            permission_id=4,
+            module="user",
+            action="view",
+            description="Can view users",
+            is_active=True,
+            created_at=datetime(2024, 4, 5, 6, 7, 8),
+            updated_at=datetime(2024, 4, 5, 6, 7, 9),
+        )
 
         with patch.object(
             permission_service.permission_repository,
@@ -439,7 +459,15 @@ class PermissionServiceTestCase(unittest.TestCase):
 
     def test_update_permission_returns_msg_data_response(self):
         body = PermissionUpdateRequest(module="user", action="edit", description="Can edit", isActive=True)
-        existing_permission = SimpleNamespace()
+        existing_permission = SimpleNamespace(
+            permission_id=4,
+            module="user",
+            action="view",
+            description="Can view",
+            is_active=True,
+            created_at=datetime(2024, 4, 5, 6, 7, 8),
+            updated_at=datetime(2024, 4, 5, 6, 7, 9),
+        )
         updated_permission = SimpleNamespace(
             permission_id=4,
             module="user",
@@ -465,7 +493,9 @@ class PermissionServiceTestCase(unittest.TestCase):
                     "update_permission",
                     return_value=updated_permission,
                 ):
-                    result, status = permission_service.update_permission(4, body)
+                    with patch.object(permission_service.auth_utils, "current_user_id", return_value=99):
+                        with patch.object(permission_service.audit_service, "create_log_internal") as create_log_internal:
+                            result, status = permission_service.update_permission(4, body)
 
         self.assertEqual(status, 200)
         self.assertEqual(
@@ -482,6 +512,18 @@ class PermissionServiceTestCase(unittest.TestCase):
                     "updatedAt": "2024-04-05 06:07:10",
                 },
             },
+        )
+        create_log_internal.assert_called_once_with(
+            user_id=99,
+            module="permission",
+            action="update",
+            details=(
+                'permission 4 updated: '
+                '[Original Data: {"permissionId":4,"module":"user","action":"view","description":"Can view",'
+                '"isActive":true,"createdAt":"2024-04-05 06:07:08","updatedAt":"2024-04-05 06:07:09"}] '
+                '[Updated Data:{"permissionId":4,"module":"user","action":"edit","description":"Can edit",'
+                '"isActive":true,"createdAt":"2024-04-05 06:07:08","updatedAt":"2024-04-05 06:07:10"}]'
+            ),
         )
 
 
@@ -726,12 +768,14 @@ class UserServiceTestCase(unittest.TestCase):
 
     def test_toggle_user_permission_returns_msg_data_response(self):
         user = SimpleNamespace()
-        permission = SimpleNamespace(action="view", is_active=True)
+        permission = SimpleNamespace(module="user", action="view", is_active=True)
 
         with patch.object(user_service.user_repository, "get_user_by_id", return_value=user):
             with patch.object(user_service.user_repository, "get_permission_by_id", return_value=permission):
                 with patch.object(user_service.user_repository, "set_user_permission") as set_user_permission:
-                    result, status = user_service.toggle_user_permission(8, 4, True)
+                    with patch.object(user_service.auth_utils, "current_user_id", return_value=99):
+                        with patch.object(user_service.audit_service, "create_log_internal") as create_log_internal:
+                            result, status = user_service.toggle_user_permission(8, 4, True)
 
         self.assertEqual(status, 200)
         self.assertEqual(
@@ -746,6 +790,23 @@ class UserServiceTestCase(unittest.TestCase):
             },
         )
         set_user_permission.assert_called_once_with(8, 4, True)
+        create_log_internal.assert_called_once_with(
+            user_id=99,
+            module="user",
+            action="permission.update",
+            details=(
+                "user 8 permission updated: "
+                + json.dumps(
+                    {
+                        "userId": 8,
+                        "permissionId": 4,
+                        "module": "user",
+                        "action": "view",
+                        "enabled": True,
+                    },
+                )
+            ),
+        )
 
 
 if __name__ == "__main__":

@@ -1,3 +1,4 @@
+from app.module.audit import audit_service
 from sqlalchemy.exc import IntegrityError
 
 from app.module.permission import permission_repository
@@ -9,7 +10,7 @@ from app.shared.schemas.permission_schema import (
     PermissionListQuery,
     PermissionUpdateRequest,
 )
-from app.shared.utils import time as time_utils
+from app.shared.utils import auth as auth_utils, time as time_utils
 
 
 def get_permissions(query: PermissionListQuery):
@@ -59,9 +60,18 @@ def create_permission(body: PermissionCreateRequest):
     except IntegrityError:
         return ErrorResponse(error="Permission already exists"), 409
 
+    permission_detail = _map_permission(permission)
+
+    audit_service.create_log_internal(
+        user_id=auth_utils.current_user_id(),
+        module="permission",
+        action="create",
+        details=f"permission {permission.permission_id} created: {permission_detail.model_dump_json()}",
+    )
+
     return MsgCodeDataResponse[PermissionItem](
         msgCode="permission.created",
-        data=_map_permission(permission),
+        data=permission_detail,
     ), 201
 
 
@@ -69,6 +79,8 @@ def update_permission(permission_id: int, body: PermissionUpdateRequest):
     permission = permission_repository.get_permission_by_id(permission_id)
     if not permission:
         return ErrorResponse(error="Permission not found"), 404
+
+    original_permission = _map_permission(permission).model_dump_json()
 
     module = body.module
     action = body.action
@@ -96,7 +108,20 @@ def update_permission(permission_id: int, body: PermissionUpdateRequest):
     except IntegrityError:
         return ErrorResponse(error="Permission already exists"), 409
 
+    updated_permission_detail = _map_permission(permission)
+
+    audit_service.create_log_internal(
+        user_id=auth_utils.current_user_id(),
+        module="permission",
+        action="update",
+        details=(
+            f"permission {permission.permission_id} updated: "
+            f"[Original Data: {original_permission}] "
+            f"[Updated Data:{updated_permission_detail.model_dump_json()}]"
+        ),
+    )
+
     return MsgCodeDataResponse[PermissionItem](
         msgCode="permission.updated",
-        data=_map_permission(permission),
+        data=updated_permission_detail,
     ), 200
