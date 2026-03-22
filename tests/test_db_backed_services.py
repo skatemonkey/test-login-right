@@ -205,6 +205,68 @@ class NotificationServiceTestCase(unittest.TestCase):
             },
         )
 
+    def test_mark_as_read_returns_no_content_on_success(self):
+        notification = SimpleNamespace(
+            id=1,
+            user_id=2,
+            message="hello",
+            is_read=True,
+            created_at=datetime(2024, 3, 4, 5, 6, 7),
+        )
+
+        with patch.object(
+            notification_service.notification_repository,
+            "mark_notification_as_read",
+            return_value=notification,
+        ) as mark_notification_as_read:
+            result, status = notification_service.mark_as_read(1, 2)
+
+        self.assertEqual(status, 204)
+        self.assertIsNone(result)
+        mark_notification_as_read.assert_called_once_with(1, 2)
+
+    def test_mark_as_read_returns_not_found_error_when_missing(self):
+        with patch.object(
+            notification_service.notification_repository,
+            "mark_notification_as_read",
+            return_value=None,
+        ) as mark_notification_as_read:
+            result, status = notification_service.mark_as_read(1, 2)
+
+        self.assertEqual(status, 404)
+        self.assertEqual(result.model_dump(), {"error": "Notification not found"})
+        mark_notification_as_read.assert_called_once_with(1, 2)
+
+    def test_mark_all_as_read_returns_no_content_on_success(self):
+        with patch.object(
+            notification_service.notification_repository,
+            "mark_all_as_read",
+            return_value=3,
+        ) as mark_all_as_read:
+            result, status = notification_service.mark_all_as_read(2)
+
+        self.assertEqual(status, 204)
+        self.assertIsNone(result)
+        mark_all_as_read.assert_called_once_with(2)
+
+    def test_get_unread_count_returns_response_model(self):
+        with patch.object(
+            notification_service.notification_repository,
+            "get_unread_count",
+            return_value=4,
+        ) as get_unread_count:
+            result, status = notification_service.get_unread_count(2)
+
+        self.assertEqual(status, 200)
+        self.assertEqual(
+            result.model_dump(),
+            {
+                "userId": 2,
+                "unreadCount": 4,
+            },
+        )
+        get_unread_count.assert_called_once_with(2)
+
 
 class PermissionServiceTestCase(unittest.TestCase):
     def test_get_permissions_maps_repository_rows(self):

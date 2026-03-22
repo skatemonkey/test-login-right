@@ -17,3 +17,8 @@ class NotificationItem(BaseModel):
     message: str
     isRead: bool
     createdAt: str
+
+
+class NotificationUnreadCountResponse(BaseModel):
+    userId: int
+    unreadCount: int

@@ -2,7 +2,10 @@ from typing import Any
 
 from app.module.notification import notification_repository, notification_stream
 from app.shared.schemas.api_response_schema import ErrorResponse
-from app.shared.schemas.notification_schema import NotificationItem
+from app.shared.schemas.notification_schema import (
+    NotificationItem,
+    NotificationUnreadCountResponse,
+)
 from app.shared.schemas.pagination_schema import NotificationPagination
 from app.shared.utils import time as time_utils
 
@@ -40,25 +43,25 @@ def list_notifications_paginated(
     ), 200
 
 
-def get_unread_count(user_id: int) -> tuple[dict[str, int], int]:
+def get_unread_count(user_id: int) -> tuple[NotificationUnreadCountResponse, int]:
     unread_count = notification_repository.get_unread_count(user_id)
-    return {"userId": user_id, "unreadCount": unread_count}, 200
+    return NotificationUnreadCountResponse(
+        userId=user_id,
+        unreadCount=unread_count,
+    ), 200
 
 
-def mark_as_read(notification_id: int, user_id: int) -> tuple[dict[str, Any] | ErrorResponse, int]:
+def mark_as_read(notification_id: int, user_id: int) -> tuple[None | ErrorResponse, int]:
     notification = notification_repository.mark_notification_as_read(notification_id, user_id)
     if not notification:
         return ErrorResponse(error="Notification not found"), 404
 
-    return {
-        "message": "Notification marked as read",
-        "notification": _to_notification_payload(notification),
-    }, 200
+    return None, 204
 
 
-def mark_all_as_read(user_id: int) -> tuple[dict[str, Any], int]:
-    updated_count = notification_repository.mark_all_as_read(user_id)
-    return {"message": "All notifications marked as read", "updatedCount": updated_count}, 200
+def mark_all_as_read(user_id: int) -> tuple[None, int]:
+    notification_repository.mark_all_as_read(user_id)
+    return None, 204
 
 
 def _to_notification_payload(notification) -> dict[str, Any]:

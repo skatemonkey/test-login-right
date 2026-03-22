@@ -29,6 +29,8 @@ def get_my_notifications(query: NotificationListQuery):
 @validate()
 def mark_notification_as_read(notification_id: int):
     result, status = notification_service.mark_as_read(notification_id, auth_utils.current_user_id())
+    if status == 204:
+        return Response(status=204)
     return api_util.json_response(result, status)
 
 
@@ -37,6 +39,8 @@ def mark_notification_as_read(notification_id: int):
 @validate()
 def mark_all_notifications_as_read():
     result, status = notification_service.mark_all_as_read(auth_utils.current_user_id())
+    if status == 204:
+        return Response(status=204)
     return api_util.json_response(result, status)
 
 
