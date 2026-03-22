@@ -53,9 +53,6 @@ def get_unread_count(user_id: int) -> tuple[NotificationUnreadCountResponse, int
 
 def mark_as_read(notification_id: int, user_id: int) -> tuple[None | ErrorResponse, int]:
     notification = notification_repository.mark_notification_as_read(notification_id, user_id)
-    if not notification:
-        return ErrorResponse(error="Notification not found"), 404
-
     return None, 204
 
 

@@ -18,7 +18,7 @@ permission_bp = Blueprint("permission", __name__)
 @validate()
 def get_permissions(body: PermissionListQuery):
     result, status = permission_service.get_permissions(body)
-    return api_util.api_response(result, status)
+    return api_util.model_response(result, status)
 
 
 @permission_bp.post("")
@@ -26,7 +26,7 @@ def get_permissions(body: PermissionListQuery):
 @validate()
 def create_permission(body: PermissionCreateRequest):
     result, status = permission_service.create_permission(body)
-    return api_util.api_response(result, status)
+    return api_util.model_response(result, status)
 
 
 @permission_bp.put("/<int:permission_id>")
@@ -34,4 +34,4 @@ def create_permission(body: PermissionCreateRequest):
 @validate()
 def update_permission(permission_id: int, body: PermissionUpdateRequest):
     result, status = permission_service.update_permission(permission_id, body)
-    return api_util.api_response(result, status)
+    return api_util.model_response(result, status)
