@@ -6,9 +6,10 @@ from app.module.audit import audit_repository
 from app.shared.schemas.audit_schema import AuditLogItem, AuditLogQuery, AuditLogRequest
 from app.shared.schemas.pagination_schema import PaginatedResponse
 from app.shared.utils import time as time_utils
+from app.shared.utils import user_agent as user_agent_utils
 
 
-def create_log(req: AuditLogRequest, ip=str):
+def create_log(req: AuditLogRequest, ip: str | None = None):
     details = req.details
     if isinstance(details, dict):
         details = json.dumps(details)
@@ -18,7 +19,7 @@ def create_log(req: AuditLogRequest, ip=str):
         ip=ip,
         module=req.module,
         action=req.action,
-        device=req.device,
+        device=user_agent_utils.summarize_device(req.device),
         details=details,
     )
 
@@ -45,14 +46,14 @@ def create_log_internal(
             ip = request_ip[:45] if request_ip else None
         if device is None:
             user_agent = request.headers.get("User-Agent")
-            device = user_agent[:255] if user_agent else None
+            device = user_agent_utils.summarize_device(user_agent)
 
     audit_repository.create_log(
         user_id=user_id,
         ip=ip,
         module=module,
         action=action,
-        device=device,
+        device=user_agent_utils.summarize_device(device),
         details=details,
     )
 

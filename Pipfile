@@ -13,6 +13,7 @@ requests = "*"
 pydantic = "*"
 flask-pydantic = "*"
 redis = "*"
+ua-parser = "*"
 
 [dev-packages]
 ruff = "*"

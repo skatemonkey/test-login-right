@@ -83,6 +83,31 @@ class AuditServiceTestCase(unittest.TestCase):
             details=json.dumps({"source": "ui"}),
         )
 
+    def test_create_log_summarizes_raw_user_agent(self):
+        request = AuditLogRequest(
+            userId=1,
+            module="audit",
+            action="create",
+            device=(
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/146.0.0.0 Safari/537.36 Edg/146.0.0.0"
+            ),
+            details=None,
+        )
+
+        with patch.object(audit_service.audit_repository, "create_log") as create_log:
+            audit_service.create_log(request, ip="127.0.0.1")
+
+        create_log.assert_called_once_with(
+            user_id=1,
+            ip="127.0.0.1",
+            module="audit",
+            action="create",
+            device="Edge 146 on Windows 10 (x64)",
+            details=None,
+        )
+
     def test_create_log_internal_passes_details_through_to_repository(self):
         with patch.object(audit_service.audit_repository, "create_log") as create_log:
             audit_service.create_log_internal(
@@ -105,12 +130,17 @@ class AuditServiceTestCase(unittest.TestCase):
 
     def test_create_log_internal_uses_request_context_for_ip_and_device(self):
         app = Flask(__name__)
+        user_agent = (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/146.0.0.0 Safari/537.36 Edg/146.0.0.0"
+        )
 
         with app.test_request_context(
             "/audit/log",
             headers={
                 "X-Forwarded-For": "203.0.113.10, 10.0.0.1",
-                "User-Agent": "Mozilla/5.0",
+                "User-Agent": user_agent,
             },
             environ_base={"REMOTE_ADDR": "127.0.0.1"},
         ):
@@ -127,7 +157,7 @@ class AuditServiceTestCase(unittest.TestCase):
             ip="203.0.113.10",
             module="audit",
             action="create",
-            device="Mozilla/5.0",
+            device="Edge 146 on Windows 10 (x64)",
             details='{"source":"service"}',
         )
 
