@@ -4,6 +4,7 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
+from flask import Flask
 from sqlalchemy.exc import IntegrityError
 
 from app.module.audit import audit_service
@@ -80,6 +81,54 @@ class AuditServiceTestCase(unittest.TestCase):
             action="create",
             device="browser",
             details=json.dumps({"source": "ui"}),
+        )
+
+    def test_create_log_internal_passes_details_through_to_repository(self):
+        with patch.object(audit_service.audit_repository, "create_log") as create_log:
+            audit_service.create_log_internal(
+                user_id=1,
+                module="audit",
+                action="create",
+                ip="127.0.0.1",
+                device="browser",
+                details='{"source":"service"}',
+            )
+
+        create_log.assert_called_once_with(
+            user_id=1,
+            ip="127.0.0.1",
+            module="audit",
+            action="create",
+            device="browser",
+            details='{"source":"service"}',
+        )
+
+    def test_create_log_internal_uses_request_context_for_ip_and_device(self):
+        app = Flask(__name__)
+
+        with app.test_request_context(
+            "/audit/log",
+            headers={
+                "X-Forwarded-For": "203.0.113.10, 10.0.0.1",
+                "User-Agent": "Mozilla/5.0",
+            },
+            environ_base={"REMOTE_ADDR": "127.0.0.1"},
+        ):
+            with patch.object(audit_service.audit_repository, "create_log") as create_log:
+                audit_service.create_log_internal(
+                    user_id=1,
+                    module="audit",
+                    action="create",
+                    details='{"source":"service"}',
+                )
+
+        create_log.assert_called_once_with(
+            user_id=1,
+            ip="203.0.113.10",
+            module="audit",
+            action="create",
+            device="Mozilla/5.0",
+            details='{"source":"service"}',
         )
 
     def test_get_logs_maps_repository_rows_to_paginated_response(self):
@@ -569,7 +618,9 @@ class UserServiceTestCase(unittest.TestCase):
         with patch.object(user_service.user_repository, "username_exists", return_value=False):
             with patch.object(user_service, "_hash_password", return_value="hashed-password"):
                 with patch.object(user_service.user_repository, "create_user", return_value=user):
-                    result, status = user_service.create_user(body)
+                    with patch.object(user_service.auth_utils, "current_user_id", return_value=99):
+                        with patch.object(user_service.audit_service, "create_log_internal") as create_log_internal:
+                            result, status = user_service.create_user(body)
 
         self.assertEqual(status, 201)
         self.assertEqual(
@@ -587,6 +638,21 @@ class UserServiceTestCase(unittest.TestCase):
                 },
             },
         )
+        create_log_internal.assert_called_once()
+        self.assertEqual(
+            create_log_internal.call_args.kwargs,
+            {
+                "user_id": 99,
+                "module": "user",
+                "action": "create",
+                "details": (
+                    'user alice created: '
+                    '{"userId":8,"username":"alice","email":"alice@example.com",'
+                    '"isActive":true,"permissionIds":[],"createdAt":"2024-05-06 07:08:09",'
+                    '"updatedAt":"2024-05-06 07:08:10"}'
+                ),
+            },
+        )
 
     def test_update_user_returns_msg_data_response(self):
         body = UserUpdateRequest(
@@ -595,7 +661,15 @@ class UserServiceTestCase(unittest.TestCase):
             password="password123",
             isActive=True,
         )
-        existing_user = SimpleNamespace()
+        existing_user = SimpleNamespace(
+            user_id=8,
+            username="alice-old",
+            email="alice-old@example.com",
+            is_active=False,
+            created_at=datetime(2024, 5, 6, 7, 8, 9),
+            updated_at=datetime(2024, 5, 6, 7, 8, 10),
+            permissions=[],
+        )
         updated_user = SimpleNamespace(
             user_id=8,
             username="alice",
@@ -606,7 +680,7 @@ class UserServiceTestCase(unittest.TestCase):
             permissions=[],
         )
 
-        with patch.object(user_service.user_repository, "get_user_by_id", return_value=existing_user):
+        with patch.object(user_service.user_repository, "get_user_by_id", return_value=existing_user) as get_user_by_id:
             with patch.object(user_service.user_repository, "username_exists", return_value=False):
                 with patch.object(user_service, "_hash_password", return_value="hashed-password"):
                     with patch.object(
@@ -614,7 +688,9 @@ class UserServiceTestCase(unittest.TestCase):
                         "update_user",
                         return_value=updated_user,
                     ):
-                        result, status = user_service.update_user(8, body)
+                        with patch.object(user_service.auth_utils, "current_user_id", return_value=99):
+                            with patch.object(user_service.audit_service, "create_log_internal") as create_log_internal:
+                                result, status = user_service.update_user(8, body)
 
         self.assertEqual(status, 200)
         self.assertEqual(
@@ -631,6 +707,21 @@ class UserServiceTestCase(unittest.TestCase):
                     "updatedAt": "2024-05-06 07:08:10",
                 },
             },
+        )
+        get_user_by_id.assert_called_once_with(8, with_permissions=True)
+        create_log_internal.assert_called_once_with(
+            user_id=99,
+            module="user",
+            action="update",
+            details=(
+                'user 8 updated: '
+                '[Original Data: {"userId":8,"username":"alice-old","email":"alice-old@example.com",'
+                '"isActive":false,"permissionIds":[],"createdAt":"2024-05-06 07:08:09",'
+                '"updatedAt":"2024-05-06 07:08:10"}] '
+                '[Updated Data:{"userId":8,"username":"alice","email":"alice@example.com",'
+                '"isActive":true,"permissionIds":[],"createdAt":"2024-05-06 07:08:09",'
+                '"updatedAt":"2024-05-06 07:08:10"}]'
+            ),
         )
 
     def test_toggle_user_permission_returns_msg_data_response(self):

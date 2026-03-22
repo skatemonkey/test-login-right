@@ -1,6 +1,7 @@
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash
 
+from app.module.audit import audit_service
 from app.module.user import user_repository
 from app.shared.schemas.api_response_schema import ErrorResponse, MsgCodeDataResponse
 from app.shared.schemas.pagination_schema import PaginatedResponse
@@ -14,7 +15,7 @@ from app.shared.schemas.user_schema import (
     UserPermissionToggleResult,
     UserUpdateRequest,
 )
-from app.shared.utils import time as time_utils
+from app.shared.utils import auth as auth_utils, time as time_utils
 
 ALLOWED_PERMISSION_ACTIONS = ("view", "create", "update", "delete", "approve")
 ACTION_ORDER = {action: idx for idx, action in enumerate(ALLOWED_PERMISSION_ACTIONS)}
@@ -78,16 +79,27 @@ def create_user(req: UserCreateRequest):
             return ErrorResponse(error="Username already exists"), 409
         return ErrorResponse(error="Failed to create user"), 500
 
+    user_detail = _map_user_detail(user)
+
+    audit_service.create_log_internal(
+        user_id=auth_utils.current_user_id(),
+        module="user",
+        action="create",
+        details=f"user {user.username or ''} created: {user_detail.model_dump_json()}",
+    )
+
     return MsgCodeDataResponse[UserDetail](
         msgCode="user.created",
-        data=_map_user_detail(user),
+        data=user_detail,
     ), 201
 
 
 def update_user(user_id: int, req: UserUpdateRequest):
-    user = user_repository.get_user_by_id(user_id)
+    user = user_repository.get_user_by_id(user_id, with_permissions=True)
     if not user:
         return ErrorResponse(error="User not found"), 404
+
+    original_user = _map_user_detail(user).model_dump_json()
 
     username = req.username
     email = req.email
@@ -114,9 +126,22 @@ def update_user(user_id: int, req: UserUpdateRequest):
             return ErrorResponse(error="Username already exists"), 409
         return ErrorResponse(error="Failed to update user"), 500
 
+    updated_user_detail = _map_user_detail(user)
+
+    audit_service.create_log_internal(
+        user_id=auth_utils.current_user_id(),
+        module="user",
+        action="update",
+        details=(
+            f"user {user.user_id} updated: "
+            f"[Original Data: {original_user}] "
+            f"[Updated Data:{updated_user_detail.model_dump_json()}]"
+        ),
+    )
+
     return MsgCodeDataResponse[UserDetail](
         msgCode="user.updated",
-        data=_map_user_detail(user),
+        data=updated_user_detail,
     ), 200
 
 

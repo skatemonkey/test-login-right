@@ -1,5 +1,7 @@
 import json
 
+from flask import has_request_context, request
+
 from app.module.audit import audit_repository
 from app.shared.schemas.audit_schema import AuditLogItem, AuditLogQuery, AuditLogRequest
 from app.shared.schemas.pagination_schema import PaginatedResponse
@@ -21,6 +23,38 @@ def create_log(req: AuditLogRequest, ip=str):
     )
 
     return None, 204
+
+
+def create_log_internal(
+    *,
+    user_id: int,
+    module: str,
+    action: str,
+    ip: str | None = None,
+    device: str | None = None,
+    details: str | None = None,
+):
+    if has_request_context():
+        if ip is None:
+            forwarded_for = request.headers.get("X-Forwarded-For")
+            request_ip = (
+                forwarded_for.split(",")[0].strip()
+                if forwarded_for
+                else request.remote_addr
+            )
+            ip = request_ip[:45] if request_ip else None
+        if device is None:
+            user_agent = request.headers.get("User-Agent")
+            device = user_agent[:255] if user_agent else None
+
+    audit_repository.create_log(
+        user_id=user_id,
+        ip=ip,
+        module=module,
+        action=action,
+        device=device,
+        details=details,
+    )
 
 
 def get_logs(query: AuditLogQuery):
