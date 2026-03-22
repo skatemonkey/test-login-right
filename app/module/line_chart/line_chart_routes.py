@@ -23,7 +23,7 @@ line_chart_bp = Blueprint("line_chart", __name__)
 @validate()
 def get_history(body: LineChartHistoryRequest):
     result, status = line_chart_service.fetch_history(body)
-    return api_util.json_response(result, status)
+    return api_util.api_response(result, status)
 
 
 @line_chart_bp.get("/stream")

@@ -12,4 +12,4 @@ auth_bp = Blueprint("auth", __name__)
 @validate()
 def login(body: LoginRequest):
     result, status_code = auth_service.login(body)
-    return api_util.json_response(result, status_code)
+    return api_util.api_response(result, status_code)

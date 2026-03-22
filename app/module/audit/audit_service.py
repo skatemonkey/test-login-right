@@ -20,7 +20,7 @@ def create_log(req: AuditLogRequest, ip=str):
         details=details,
     )
 
-    return {"message": "logged"}, 201
+    return None, 204
 
 
 def get_logs(query: AuditLogQuery):

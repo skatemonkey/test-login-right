@@ -71,8 +71,8 @@ class AuditServiceTestCase(unittest.TestCase):
         with patch.object(audit_service.audit_repository, "create_log") as create_log:
             result, status = audit_service.create_log(request, ip="127.0.0.1")
 
-        self.assertEqual(status, 201)
-        self.assertEqual(result, {"message": "logged"})
+        self.assertEqual(status, 204)
+        self.assertIsNone(result)
         create_log.assert_called_once_with(
             user_id=1,
             ip="127.0.0.1",

@@ -13,7 +13,7 @@ audit_bp = Blueprint("audit", __name__)
 @validate()
 def create_log(body: AuditLogRequest):
     result, status = audit_service.create_log(body, ip=request.remote_addr)
-    return api_util.json_response(result, status)
+    return api_util.api_response(result, status)
 
 
 @audit_bp.post("/log/query")
@@ -21,4 +21,4 @@ def create_log(body: AuditLogRequest):
 @validate()
 def get_logs(body: AuditLogQuery):
     result, status = audit_service.get_logs(body)
-    return api_util.json_response(result, status)
+    return api_util.api_response(result, status)
