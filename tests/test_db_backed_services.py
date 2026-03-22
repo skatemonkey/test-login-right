@@ -18,7 +18,7 @@ from app.shared.schemas.permission_schema import (
     PermissionListQuery,
     PermissionUpdateRequest,
 )
-from app.shared.schemas.user_schema import UserCreateRequest, UserListQuery
+from app.shared.schemas.user_schema import UserCreateRequest, UserListQuery, UserUpdateRequest
 
 
 class AuthServiceTestCase(unittest.TestCase):
@@ -261,6 +261,47 @@ class PermissionServiceTestCase(unittest.TestCase):
         self.assertEqual(status, 409)
         self.assertEqual(result.model_dump(), {"error": "Permission already exists"})
 
+    def test_create_permission_returns_msg_data_response(self):
+        body = PermissionCreateRequest(module="user", action="view", description="Can view", isActive=True)
+        permission = SimpleNamespace(
+            permission_id=4,
+            module="user",
+            action="view",
+            description="Can view",
+            is_active=True,
+            created_at=datetime(2024, 4, 5, 6, 7, 8),
+            updated_at=datetime(2024, 4, 5, 6, 7, 9),
+        )
+
+        with patch.object(
+            permission_service.permission_repository,
+            "get_permission_by_module_and_action",
+            return_value=None,
+        ):
+            with patch.object(
+                permission_service.permission_repository,
+                "create_permission",
+                return_value=permission,
+            ):
+                result, status = permission_service.create_permission(body)
+
+        self.assertEqual(status, 201)
+        self.assertEqual(
+            result.model_dump(),
+            {
+                "msgCode": "permission.created",
+                "data": {
+                    "permissionId": 4,
+                    "module": "user",
+                    "action": "view",
+                    "description": "Can view",
+                    "isActive": True,
+                    "createdAt": "2024-04-05 06:07:08",
+                    "updatedAt": "2024-04-05 06:07:09",
+                },
+            },
+        )
+
     def test_update_permission_returns_conflict_on_integrity_error(self):
         body = PermissionUpdateRequest(module="user", action="edit", description=None, isActive=True)
         permission = SimpleNamespace()
@@ -284,6 +325,53 @@ class PermissionServiceTestCase(unittest.TestCase):
 
         self.assertEqual(status, 409)
         self.assertEqual(result.model_dump(), {"error": "Permission already exists"})
+
+    def test_update_permission_returns_msg_data_response(self):
+        body = PermissionUpdateRequest(module="user", action="edit", description="Can edit", isActive=True)
+        existing_permission = SimpleNamespace()
+        updated_permission = SimpleNamespace(
+            permission_id=4,
+            module="user",
+            action="edit",
+            description="Can edit",
+            is_active=True,
+            created_at=datetime(2024, 4, 5, 6, 7, 8),
+            updated_at=datetime(2024, 4, 5, 6, 7, 10),
+        )
+
+        with patch.object(
+            permission_service.permission_repository,
+            "get_permission_by_id",
+            return_value=existing_permission,
+        ):
+            with patch.object(
+                permission_service.permission_repository,
+                "get_permission_by_module_and_action",
+                return_value=None,
+            ):
+                with patch.object(
+                    permission_service.permission_repository,
+                    "update_permission",
+                    return_value=updated_permission,
+                ):
+                    result, status = permission_service.update_permission(4, body)
+
+        self.assertEqual(status, 200)
+        self.assertEqual(
+            result.model_dump(),
+            {
+                "msgCode": "permission.updated",
+                "data": {
+                    "permissionId": 4,
+                    "module": "user",
+                    "action": "edit",
+                    "description": "Can edit",
+                    "isActive": True,
+                    "createdAt": "2024-04-05 06:07:08",
+                    "updatedAt": "2024-04-05 06:07:10",
+                },
+            },
+        )
 
 
 class UserServiceTestCase(unittest.TestCase):
@@ -359,6 +447,32 @@ class UserServiceTestCase(unittest.TestCase):
             },
         )
 
+    def test_get_permission_matrix_returns_direct_array_sorted(self):
+        permissions = [
+            SimpleNamespace(permission_id=8, module="user", action="delete"),
+            SimpleNamespace(permission_id=6, module="audit", action="approve"),
+            SimpleNamespace(permission_id=7, module="user", action="view"),
+            SimpleNamespace(permission_id=5, module="user", action="create"),
+        ]
+
+        with patch.object(
+            user_service.user_repository,
+            "get_active_permissions",
+            return_value=permissions,
+        ):
+            result, status = user_service.get_permission_matrix()
+
+        self.assertEqual(status, 200)
+        self.assertEqual(
+            result.model_dump(),
+            [
+                {"permissionId": 6, "module": "audit", "action": "approve"},
+                {"permissionId": 7, "module": "user", "action": "view"},
+                {"permissionId": 5, "module": "user", "action": "create"},
+                {"permissionId": 8, "module": "user", "action": "delete"},
+            ],
+        )
+
     def test_create_user_returns_conflict_when_username_exists(self):
         body = UserCreateRequest(
             username="alice",
@@ -372,6 +486,113 @@ class UserServiceTestCase(unittest.TestCase):
 
         self.assertEqual(status, 409)
         self.assertEqual(result.model_dump(), {"error": "Username already exists"})
+
+    def test_create_user_returns_msg_data_response(self):
+        body = UserCreateRequest(
+            username="alice",
+            email="alice@example.com",
+            password="password123",
+            isActive=True,
+        )
+        user = SimpleNamespace(
+            user_id=8,
+            username="alice",
+            email="alice@example.com",
+            is_active=True,
+            created_at=datetime(2024, 5, 6, 7, 8, 9),
+            updated_at=datetime(2024, 5, 6, 7, 8, 10),
+            permissions=[],
+        )
+
+        with patch.object(user_service.user_repository, "username_exists", return_value=False):
+            with patch.object(user_service, "_hash_password", return_value="hashed-password"):
+                with patch.object(user_service.user_repository, "create_user", return_value=user):
+                    result, status = user_service.create_user(body)
+
+        self.assertEqual(status, 201)
+        self.assertEqual(
+            result.model_dump(),
+            {
+                "msgCode": "user.created",
+                "data": {
+                    "userId": 8,
+                    "username": "alice",
+                    "email": "alice@example.com",
+                    "isActive": True,
+                    "permissionIds": [],
+                    "createdAt": "2024-05-06 07:08:09",
+                    "updatedAt": "2024-05-06 07:08:10",
+                },
+            },
+        )
+
+    def test_update_user_returns_msg_data_response(self):
+        body = UserUpdateRequest(
+            username="alice",
+            email="alice@example.com",
+            password="password123",
+            isActive=True,
+        )
+        existing_user = SimpleNamespace()
+        updated_user = SimpleNamespace(
+            user_id=8,
+            username="alice",
+            email="alice@example.com",
+            is_active=True,
+            created_at=datetime(2024, 5, 6, 7, 8, 9),
+            updated_at=datetime(2024, 5, 6, 7, 8, 10),
+            permissions=[],
+        )
+
+        with patch.object(user_service.user_repository, "get_user_by_id", return_value=existing_user):
+            with patch.object(user_service.user_repository, "username_exists", return_value=False):
+                with patch.object(user_service, "_hash_password", return_value="hashed-password"):
+                    with patch.object(
+                        user_service.user_repository,
+                        "update_user",
+                        return_value=updated_user,
+                    ):
+                        result, status = user_service.update_user(8, body)
+
+        self.assertEqual(status, 200)
+        self.assertEqual(
+            result.model_dump(),
+            {
+                "msgCode": "user.updated",
+                "data": {
+                    "userId": 8,
+                    "username": "alice",
+                    "email": "alice@example.com",
+                    "isActive": True,
+                    "permissionIds": [],
+                    "createdAt": "2024-05-06 07:08:09",
+                    "updatedAt": "2024-05-06 07:08:10",
+                },
+            },
+        )
+
+    def test_toggle_user_permission_returns_msg_data_response(self):
+        user = SimpleNamespace()
+        permission = SimpleNamespace(action="view", is_active=True)
+
+        with patch.object(user_service.user_repository, "get_user_by_id", return_value=user):
+            with patch.object(user_service.user_repository, "get_permission_by_id", return_value=permission):
+                with patch.object(user_service.user_repository, "set_user_permission") as set_user_permission:
+                    result, status = user_service.toggle_user_permission(8, 4, True)
+
+        self.assertEqual(status, 200)
+        self.assertEqual(
+            result.model_dump(),
+            {
+                "msgCode": "user.permission.updated",
+                "data": {
+                    "userId": 8,
+                    "permissionId": 4,
+                    "enabled": True,
+                },
+            },
+        )
+        set_user_permission.assert_called_once_with(8, 4, True)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, RootModel
 
 from app.shared.schemas.pagination_schema import TableQueryBase
 
@@ -53,3 +53,13 @@ class PermissionMatrixItem(BaseModel):
     permissionId: int
     module: str
     action: str
+
+
+class PermissionMatrixResponse(RootModel[list[PermissionMatrixItem]]):
+    pass
+
+
+class UserPermissionToggleResult(BaseModel):
+    userId: int
+    permissionId: int
+    enabled: bool

@@ -2,14 +2,16 @@ from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash
 
 from app.module.user import user_repository
-from app.shared.schemas.api_response_schema import ErrorResponse
+from app.shared.schemas.api_response_schema import ErrorResponse, MsgCodeDataResponse
 from app.shared.schemas.pagination_schema import PaginatedResponse
 from app.shared.schemas.user_schema import (
     PermissionMatrixItem,
+    PermissionMatrixResponse,
     UserCreateRequest,
     UserDetail,
     UserListItem,
     UserListQuery,
+    UserPermissionToggleResult,
     UserUpdateRequest,
 )
 from app.shared.utils import time as time_utils
@@ -76,10 +78,10 @@ def create_user(req: UserCreateRequest):
             return ErrorResponse(error="Username already exists"), 409
         return ErrorResponse(error="Failed to create user"), 500
 
-    return {
-        "message": "User created",
-        "data": _map_user_detail(user).model_dump(),
-    }, 201
+    return MsgCodeDataResponse[UserDetail](
+        msgCode="user.created",
+        data=_map_user_detail(user),
+    ), 201
 
 
 def update_user(user_id: int, req: UserUpdateRequest):
@@ -112,10 +114,10 @@ def update_user(user_id: int, req: UserUpdateRequest):
             return ErrorResponse(error="Username already exists"), 409
         return ErrorResponse(error="Failed to update user"), 500
 
-    return {
-        "message": "User updated",
-        "data": _map_user_detail(user).model_dump(),
-    }, 200
+    return MsgCodeDataResponse[UserDetail](
+        msgCode="user.updated",
+        data=_map_user_detail(user),
+    ), 200
 
 
 def get_permission_matrix():
@@ -130,16 +132,14 @@ def get_permission_matrix():
         ),
     )
 
-    data = [
+    return PermissionMatrixResponse([
         PermissionMatrixItem(
             permissionId=permission.permission_id,
             module=permission.module or "",
             action=(permission.action or "").lower(),
-        ).model_dump()
+        )
         for permission in sorted_permissions
-    ]
-
-    return {"data": data}, 200
+    ]), 200
 
 
 def toggle_user_permission(user_id: int, permission_id: int, enabled: bool):
@@ -160,14 +160,14 @@ def toggle_user_permission(user_id: int, permission_id: int, enabled: bool):
     except IntegrityError:
         return ErrorResponse(error="Failed to update user permission"), 500
 
-    return {
-        "message": "User permission updated",
-        "data": {
-            "userId": user_id,
-            "permissionId": permission_id,
-            "enabled": enabled,
-        },
-    }, 200
+    return MsgCodeDataResponse[UserPermissionToggleResult](
+        msgCode="user.permission.updated",
+        data=UserPermissionToggleResult(
+            userId=user_id,
+            permissionId=permission_id,
+            enabled=enabled,
+        ),
+    ), 200
 
 
 def _map_user_detail(user) -> UserDetail:

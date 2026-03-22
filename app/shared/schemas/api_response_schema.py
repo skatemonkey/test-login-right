@@ -1,6 +1,8 @@
-from typing import Any
+from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel, model_serializer
+
+T = TypeVar("T")
 
 
 class ErrorResponse(BaseModel):
@@ -13,3 +15,8 @@ class ErrorResponse(BaseModel):
         if self.details is not None:
             payload["details"] = self.details
         return payload
+
+
+class MsgCodeDataResponse(BaseModel, Generic[T]):
+    msgCode: str
+    data: T

@@ -1,7 +1,7 @@
 from sqlalchemy.exc import IntegrityError
 
 from app.module.permission import permission_repository
-from app.shared.schemas.api_response_schema import ErrorResponse
+from app.shared.schemas.api_response_schema import ErrorResponse, MsgCodeDataResponse
 from app.shared.schemas.pagination_schema import PaginatedResponse
 from app.shared.schemas.permission_schema import (
     PermissionCreateRequest,
@@ -59,10 +59,10 @@ def create_permission(body: PermissionCreateRequest):
     except IntegrityError:
         return ErrorResponse(error="Permission already exists"), 409
 
-    return {
-        "message": "Permission created",
-        "data": _map_permission(permission).model_dump(),
-    }, 201
+    return MsgCodeDataResponse[PermissionItem](
+        msgCode="permission.created",
+        data=_map_permission(permission),
+    ), 201
 
 
 def update_permission(permission_id: int, body: PermissionUpdateRequest):
@@ -96,7 +96,7 @@ def update_permission(permission_id: int, body: PermissionUpdateRequest):
     except IntegrityError:
         return ErrorResponse(error="Permission already exists"), 409
 
-    return {
-        "message": "Permission updated",
-        "data": _map_permission(permission).model_dump(),
-    }, 200
+    return MsgCodeDataResponse[PermissionItem](
+        msgCode="permission.updated",
+        data=_map_permission(permission),
+    ), 200
