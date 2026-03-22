@@ -190,7 +190,7 @@ def toggle_user_permission(user_id: int, permission_id: int, enabled: bool):
     audit_service.create_log_internal(
         user_id=auth_utils.current_user_id(),
         module="user",
-        action="permission.update",
+        action="update",
         details=f"user {user_id} permission updated: {json.dumps({
             'userId': user_id,
             'permissionId': permission_id,
