@@ -90,8 +90,9 @@ class LineChartStreamHub:
 
         for subscriber in subscribers:
             payload = {
+                "series": series_name,
                 "timestamp": timestamp,
-                "values": {series_name: value},
+                "value": value,
             }
 
             try:

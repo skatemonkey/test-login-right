@@ -76,7 +76,7 @@ class LineChartRoutesTestCase(unittest.TestCase):
 
     def test_stream_route_emits_connected_and_point_event(self):
         event_queue: Queue = Queue()
-        event_queue.put({"timestamp": 1710000000, "values": {"cpu": 42.0}})
+        event_queue.put({"series": "cpu", "timestamp": 1710000000, "value": 42.0})
 
         fake_hub = Mock()
         fake_hub.subscribe.return_value = ("conn-1", event_queue)
@@ -105,8 +105,9 @@ class LineChartRoutesTestCase(unittest.TestCase):
         self.assertEqual(
             self._sse_data(point_chunk),
             LineChartSsePoint(
+                series="cpu",
                 timestamp=1710000000,
-                values={"cpu": 42.0},
+                value=42.0,
             ).model_dump(),
         )
         fake_hub.subscribe.assert_called_once_with(["cpu", "memory"])

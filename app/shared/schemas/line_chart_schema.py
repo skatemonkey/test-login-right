@@ -26,5 +26,6 @@ class LineChartStreamQuery(BaseModel):
 
 
 class LineChartSsePoint(BaseModel):
+    series: str
     timestamp: int
-    values: dict[str, float]
+    value: float

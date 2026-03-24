@@ -24,11 +24,11 @@ class LineChartStreamServiceTestCase(unittest.TestCase):
 
         self.assertEqual(
             cpu_queue.get_nowait(),
-            {"timestamp": 1710000000, "values": {"cpu": 11.0}},
+            {"series": "cpu", "timestamp": 1710000000, "value": 11.0},
         )
         self.assertEqual(
             memory_queue.get_nowait(),
-            {"timestamp": 1710000000, "values": {"memory": 22.0}},
+            {"series": "memory", "timestamp": 1710000000, "value": 22.0},
         )
 
         with self.assertRaises(Empty):
@@ -41,7 +41,7 @@ class LineChartStreamServiceTestCase(unittest.TestCase):
 
         hub.publish("cpu", 1710000010, 15)
 
-        expected_payload = {"timestamp": 1710000010, "values": {"cpu": 15.0}}
+        expected_payload = {"series": "cpu", "timestamp": 1710000010, "value": 15.0}
         self.assertEqual(queue_1.get_nowait(), expected_payload)
         self.assertEqual(queue_2.get_nowait(), expected_payload)
 
@@ -64,7 +64,7 @@ class LineChartStreamServiceTestCase(unittest.TestCase):
 
         self.assertEqual(
             queue.get_nowait(),
-            {"timestamp": 1710000000, "values": {"cpu": 12.5}},
+            {"series": "cpu", "timestamp": 1710000000, "value": 12.5},
         )
 
 
