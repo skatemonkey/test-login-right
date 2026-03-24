@@ -18,30 +18,14 @@ def fetch_history(body: LineChartHistoryRequest):
     if body.start > body.end:
         return ErrorResponse(error="start must be less than or equal to end"), 400
 
-    selected_series = normalize_series(body.series)
-    rows = line_chart_redis_repository.fetch_history_rows(body.start, body.end)
+    selected_series = list(body.series)
+    unique_series = list(dict.fromkeys(selected_series))
+    rows_by_series = line_chart_redis_repository.fetch_history_rows(unique_series, body.start, body.end)
 
-    points_by_series: dict[str, list[LineChartPoint]] = {
-        series_name: []
-        for series_name in selected_series
+    points_by_series = {
+        series_name: _parse_points(rows_by_series.get(series_name, []))
+        for series_name in unique_series
     }
-
-    for row in rows:
-        sample = _parse_sample(row)
-        if not sample:
-            continue
-
-        timestamp = number_utils.to_int_or_none(sample.get("timestamp"))
-        if timestamp is None:
-            continue
-
-        for series_name in selected_series:
-            value = number_utils.to_float_or_none(sample.get(series_name))
-            if value is None:
-                continue
-            points_by_series[series_name].append(
-                LineChartPoint(x=timestamp, y=value),
-            )
 
     response = LineChartHistoryResponse(
         series=[
@@ -76,7 +60,18 @@ def parse_series_query(raw_series: str | None) -> list[str]:
     return normalize_series(raw_series.split(","))
 
 
-def _parse_sample(raw_row: str) -> dict | None:
+def _parse_points(rows: list[str]) -> list[LineChartPoint]:
+    points: list[LineChartPoint] = []
+
+    for row in rows:
+        point = _parse_point(row)
+        if point is not None:
+            points.append(point)
+
+    return points
+
+
+def _parse_point(raw_row: str) -> LineChartPoint | None:
     try:
         payload = json.loads(raw_row)
     except (TypeError, json.JSONDecodeError):
@@ -85,4 +80,9 @@ def _parse_sample(raw_row: str) -> dict | None:
     if not isinstance(payload, dict):
         return None
 
-    return payload
+    timestamp = number_utils.to_int_or_none(payload.get("timestamp"))
+    value = number_utils.to_float_or_none(payload.get("value"))
+    if timestamp is None or value is None:
+        return None
+
+    return LineChartPoint(x=timestamp, y=value)

@@ -9,11 +9,13 @@ REDIS_URL = (
     "redis://default:pD8Pvvvx3R2mzZUEzUrCqwtQxobrEpr8@"
     "redis-15870.c11.us-east-1-2.ec2.cloud.redislabs.com:15870"
 )
-REDIS_KEY = "line_chart:points"
+HISTORY_KEY_PREFIX = "chart_history:"
+LEGACY_REDIS_KEY = "line_chart:points"
 LIVE_UPDATES_CHANNEL = "line_chart:updates"
 SAMPLE_INTERVAL_SECONDS = 5
 INITIAL_HISTORY_SECONDS = 5 * 60 * 60
 RETENTION_SECONDS = 7 * 24 * 60 * 60
+SERIES_NAMES = ("cpu", "network", "memory")
 
 
 def create_sample(timestamp):
@@ -29,21 +31,41 @@ def get_redis_client():
     return redis.Redis.from_url(REDIS_URL, decode_responses=True)
 
 
-def serialize_sample(sample):
-    return json.dumps(sample, separators=(",", ":"))
+def history_key(series_name):
+    return f"{HISTORY_KEY_PREFIX}{series_name}"
+
+
+def serialize_history_point(timestamp, value):
+    return json.dumps({"timestamp": timestamp, "value": value}, separators=(",", ":"))
+
+
+def serialize_live_update(series_name, timestamp, value):
+    return json.dumps(
+        {"series": series_name, "timestamp": timestamp, "value": value},
+        separators=(",", ":"),
+    )
 
 
 def save_sample(redis_client, sample):
-    payload = serialize_sample(sample)
-    redis_client.zadd(REDIS_KEY, {payload: sample["timestamp"]})
-    redis_client.publish(LIVE_UPDATES_CHANNEL, payload)
+    timestamp = sample["timestamp"]
+    cutoff_timestamp = timestamp - RETENTION_SECONDS
+    removed_count = 0
 
-    cutoff_timestamp = sample["timestamp"] - RETENTION_SECONDS
-    removed_count = redis_client.zremrangebyscore(
-        REDIS_KEY,
-        "-inf",
-        cutoff_timestamp - 1,
-    )
+    for series_name in SERIES_NAMES:
+        redis_client.zadd(
+            history_key(series_name),
+            {serialize_history_point(timestamp, sample[series_name]): timestamp},
+        )
+        redis_client.publish(
+            LIVE_UPDATES_CHANNEL,
+            serialize_live_update(series_name, timestamp, sample[series_name]),
+        )
+        removed_count += redis_client.zremrangebyscore(
+            history_key(series_name),
+            "-inf",
+            cutoff_timestamp - 1,
+        )
+
     return removed_count
 
 
@@ -56,16 +78,29 @@ def reset_and_seed_history(
     timestamp = int(time.time()) if now is None else now
     start_timestamp = timestamp - history_seconds
 
-    members = {}
+    members_by_series = {
+        series_name: {}
+        for series_name in SERIES_NAMES
+    }
+    seeded_count = 0
     for sample_timestamp in range(start_timestamp, timestamp + 1, interval_seconds):
         sample = create_sample(sample_timestamp)
-        members[serialize_sample(sample)] = sample_timestamp
+        seeded_count += 1
 
-    redis_client.delete(REDIS_KEY)
-    if members:
-        redis_client.zadd(REDIS_KEY, members)
+        for series_name in SERIES_NAMES:
+            members_by_series[series_name][
+                serialize_history_point(sample_timestamp, sample[series_name])
+            ] = sample_timestamp
 
-    return len(members)
+    redis_client.delete(
+        LEGACY_REDIS_KEY,
+        *(history_key(series_name) for series_name in SERIES_NAMES),
+    )
+    for series_name, members in members_by_series.items():
+        if members:
+            redis_client.zadd(history_key(series_name), members)
+
+    return seeded_count
 
 
 def run_once(redis_client, now=None):
@@ -100,7 +135,7 @@ def run_forever(
 
 def main():
     redis_client = get_redis_client()
-    print(f"Writing samples to Redis sorted set {REDIS_KEY}")
+    print(f"Writing samples to Redis sorted sets {HISTORY_KEY_PREFIX}*")
     seeded_count = reset_and_seed_history(redis_client)
     print(f"Seeded {seeded_count} samples covering the last 5 hours")
     run_forever(redis_client, sleep_first=True)

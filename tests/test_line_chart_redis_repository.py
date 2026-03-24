@@ -5,23 +5,35 @@ from app.module.line_chart import line_chart_redis_repository
 
 
 class LineChartRedisRepositoryTestCase(unittest.TestCase):
-    def test_fetch_history_rows_queries_sorted_set(self):
+    def test_fetch_history_rows_queries_each_series_key(self):
         redis_client = Mock()
-        redis_client.zrangebyscore.return_value = ["row-1", "row-2"]
+        pipeline = Mock()
+        pipeline.execute.return_value = [["cpu-row"], ["memory-row-1", "memory-row-2"]]
+        redis_client.pipeline.return_value = pipeline
 
         with patch.object(
             line_chart_redis_repository.redis_ext,
             "get_redis",
             return_value=redis_client,
         ):
-            rows = line_chart_redis_repository.fetch_history_rows(10, 20)
+            rows = line_chart_redis_repository.fetch_history_rows(["cpu", "memory"], 10, 20)
 
-        self.assertEqual(rows, ["row-1", "row-2"])
-        redis_client.zrangebyscore.assert_called_once_with(
-            line_chart_redis_repository.REDIS_KEY,
-            10,
-            20,
+        self.assertEqual(
+            rows,
+            {
+                "cpu": ["cpu-row"],
+                "memory": ["memory-row-1", "memory-row-2"],
+            },
         )
+        redis_client.pipeline.assert_called_once_with()
+        self.assertEqual(
+            pipeline.zrangebyscore.call_args_list,
+            [
+                call(line_chart_redis_repository.history_key("cpu"), 10, 20),
+                call(line_chart_redis_repository.history_key("memory"), 10, 20),
+            ],
+        )
+        pipeline.execute.assert_called_once_with()
 
     def test_listen_for_live_updates_forwards_messages_and_cleans_up(self):
         redis_client = Mock()

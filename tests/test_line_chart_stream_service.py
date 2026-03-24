@@ -19,7 +19,8 @@ class LineChartStreamServiceTestCase(unittest.TestCase):
         _, cpu_queue = hub.subscribe(["cpu"])
         _, memory_queue = hub.subscribe(["memory"])
 
-        hub.publish({"timestamp": 1710000000, "cpu": 11, "memory": 22, "network": 33})
+        hub.publish("cpu", 1710000000, 11)
+        hub.publish("memory", 1710000000, 22)
 
         self.assertEqual(
             cpu_queue.get_nowait(),
@@ -38,7 +39,7 @@ class LineChartStreamServiceTestCase(unittest.TestCase):
         _, queue_1 = hub.subscribe(["cpu"])
         _, queue_2 = hub.subscribe(["cpu"])
 
-        hub.publish({"timestamp": 1710000010, "cpu": 15})
+        hub.publish("cpu", 1710000010, 15)
 
         expected_payload = {"timestamp": 1710000010, "values": {"cpu": 15.0}}
         self.assertEqual(queue_1.get_nowait(), expected_payload)
@@ -49,10 +50,22 @@ class LineChartStreamServiceTestCase(unittest.TestCase):
         _, queue = hub.subscribe(["cpu"])
 
         hub.handle_pubsub_message("not-json")
-        hub.handle_pubsub_message('{"timestamp": "x", "cpu": 1}')
+        hub.handle_pubsub_message('{"series":"cpu","timestamp":"x","value":1}')
+        hub.handle_pubsub_message('{"timestamp":1710000000,"cpu":1}')
 
         with self.assertRaises(Empty):
             queue.get_nowait()
+
+    def test_handle_pubsub_message_routes_new_payload_shape(self):
+        hub = LineChartStreamHub(queue_size=5)
+        _, queue = hub.subscribe(["cpu"])
+
+        hub.handle_pubsub_message('{"series":"cpu","timestamp":1710000000,"value":12.5}')
+
+        self.assertEqual(
+            queue.get_nowait(),
+            {"timestamp": 1710000000, "values": {"cpu": 12.5}},
+        )
 
 
 if __name__ == "__main__":

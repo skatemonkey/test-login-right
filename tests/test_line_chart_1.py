@@ -2,7 +2,7 @@ import importlib.util
 import json
 from pathlib import Path
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, call, patch
 
 MODULE_PATH = (
     Path(__file__).resolve().parents[1]
@@ -34,7 +34,7 @@ class LineChart1TestCase(unittest.TestCase):
 
     def test_run_once_writes_sample_and_prunes_old_entries(self):
         redis_client = Mock()
-        redis_client.zremrangebyscore.return_value = 2
+        redis_client.zremrangebyscore.side_effect = [2, 2, 2]
         now = 1700000000
 
         with patch.object(
@@ -51,21 +51,62 @@ class LineChart1TestCase(unittest.TestCase):
             "memory": 78.9,
         }
         self.assertEqual(sample, expected_sample)
-        self.assertEqual(removed_count, 2)
+        self.assertEqual(removed_count, 6)
 
-        redis_client.zadd.assert_called_once()
-        zadd_args, _ = redis_client.zadd.call_args
-        self.assertEqual(zadd_args[0], line_chart_1.REDIS_KEY)
+        self.assertEqual(
+            redis_client.zadd.call_args_list,
+            [
+                call(
+                    line_chart_1.history_key("cpu"),
+                    {line_chart_1.serialize_history_point(now, 12.35): now},
+                ),
+                call(
+                    line_chart_1.history_key("network"),
+                    {line_chart_1.serialize_history_point(now, 456.79): now},
+                ),
+                call(
+                    line_chart_1.history_key("memory"),
+                    {line_chart_1.serialize_history_point(now, 78.9): now},
+                ),
+            ],
+        )
+        self.assertEqual(
+            redis_client.publish.call_args_list,
+            [
+                call(
+                    line_chart_1.LIVE_UPDATES_CHANNEL,
+                    line_chart_1.serialize_live_update("cpu", now, 12.35),
+                ),
+                call(
+                    line_chart_1.LIVE_UPDATES_CHANNEL,
+                    line_chart_1.serialize_live_update("network", now, 456.79),
+                ),
+                call(
+                    line_chart_1.LIVE_UPDATES_CHANNEL,
+                    line_chart_1.serialize_live_update("memory", now, 78.9),
+                ),
+            ],
+        )
 
-        payload, score = next(iter(zadd_args[1].items()))
-        self.assertEqual(score, now)
-        self.assertEqual(json.loads(payload), expected_sample)
-        redis_client.publish.assert_called_once_with(line_chart_1.LIVE_UPDATES_CHANNEL, payload)
-
-        redis_client.zremrangebyscore.assert_called_once_with(
-            line_chart_1.REDIS_KEY,
-            "-inf",
-            now - line_chart_1.RETENTION_SECONDS - 1,
+        self.assertEqual(
+            redis_client.zremrangebyscore.call_args_list,
+            [
+                call(
+                    line_chart_1.history_key("cpu"),
+                    "-inf",
+                    now - line_chart_1.RETENTION_SECONDS - 1,
+                ),
+                call(
+                    line_chart_1.history_key("network"),
+                    "-inf",
+                    now - line_chart_1.RETENTION_SECONDS - 1,
+                ),
+                call(
+                    line_chart_1.history_key("memory"),
+                    "-inf",
+                    now - line_chart_1.RETENTION_SECONDS - 1,
+                ),
+            ],
         )
 
     def test_reset_and_seed_history_defaults_to_five_hours(self):
@@ -87,11 +128,16 @@ class LineChart1TestCase(unittest.TestCase):
         ) + 1
         self.assertEqual(line_chart_1.INITIAL_HISTORY_SECONDS, 5 * 60 * 60)
         self.assertEqual(seeded_count, expected_count)
+        redis_client.delete.assert_called_once_with(
+            line_chart_1.LEGACY_REDIS_KEY,
+            *(line_chart_1.history_key(series_name) for series_name in line_chart_1.SERIES_NAMES),
+        )
+        self.assertEqual(len(redis_client.zadd.call_args_list), len(line_chart_1.SERIES_NAMES))
 
-        zadd_args, _ = redis_client.zadd.call_args
-        stored_timestamps = sorted(zadd_args[1].values())
-        self.assertEqual(stored_timestamps[0], 0)
-        self.assertEqual(stored_timestamps[-1], 18_000)
+        for zadd_call in redis_client.zadd.call_args_list:
+            stored_timestamps = sorted(zadd_call.args[1].values())
+            self.assertEqual(stored_timestamps[0], 0)
+            self.assertEqual(stored_timestamps[-1], 18_000)
         redis_client.publish.assert_not_called()
 
     def test_reset_and_seed_history_clears_key_and_stores_expected_window(self):
@@ -114,28 +160,42 @@ class LineChart1TestCase(unittest.TestCase):
             )
 
         self.assertEqual(seeded_count, 3)
-        redis_client.delete.assert_called_once_with(line_chart_1.REDIS_KEY)
-        redis_client.zadd.assert_called_once()
-
-        zadd_args, _ = redis_client.zadd.call_args
-        self.assertEqual(zadd_args[0], line_chart_1.REDIS_KEY)
-
-        stored_members = zadd_args[1]
-        stored_timestamps = sorted(stored_members.values())
-        self.assertEqual(stored_timestamps, [90, 95, 100])
-
-        decoded_samples = sorted(
-            (json.loads(payload) for payload in stored_members),
-            key=lambda sample: sample["timestamp"],
+        redis_client.delete.assert_called_once_with(
+            line_chart_1.LEGACY_REDIS_KEY,
+            *(line_chart_1.history_key(series_name) for series_name in line_chart_1.SERIES_NAMES),
         )
-        self.assertEqual(
-            decoded_samples,
-            [
-                {"timestamp": 90, "cpu": 90.0, "network": 91.0, "memory": 92.0},
-                {"timestamp": 95, "cpu": 95.0, "network": 96.0, "memory": 97.0},
-                {"timestamp": 100, "cpu": 100.0, "network": 101.0, "memory": 102.0},
+        self.assertEqual(len(redis_client.zadd.call_args_list), len(line_chart_1.SERIES_NAMES))
+
+        stored_members_by_key = {
+            zadd_call.args[0]: zadd_call.args[1]
+            for zadd_call in redis_client.zadd.call_args_list
+        }
+        expected_points = {
+            line_chart_1.history_key("cpu"): [
+                {"timestamp": 90, "value": 90.0},
+                {"timestamp": 95, "value": 95.0},
+                {"timestamp": 100, "value": 100.0},
             ],
-        )
+            line_chart_1.history_key("network"): [
+                {"timestamp": 90, "value": 91.0},
+                {"timestamp": 95, "value": 96.0},
+                {"timestamp": 100, "value": 101.0},
+            ],
+            line_chart_1.history_key("memory"): [
+                {"timestamp": 90, "value": 92.0},
+                {"timestamp": 95, "value": 97.0},
+                {"timestamp": 100, "value": 102.0},
+            ],
+        }
+
+        for key, expected_series_points in expected_points.items():
+            stored_members = stored_members_by_key[key]
+            self.assertEqual(sorted(stored_members.values()), [90, 95, 100])
+            decoded_points = sorted(
+                (json.loads(payload) for payload in stored_members),
+                key=lambda point: point["timestamp"],
+            )
+            self.assertEqual(decoded_points, expected_series_points)
         redis_client.publish.assert_not_called()
 
     def test_run_forever_runs_one_iteration_before_sleep_stops(self):

@@ -72,36 +72,26 @@ class LineChartStreamHub:
         if not isinstance(payload, dict):
             return
 
-        self.publish(payload)
-
-    def publish(self, sample: dict) -> None:
-        timestamp = number_utils.to_int_or_none(sample.get("timestamp"))
-        if timestamp is None:
+        series_name = payload.get("series")
+        timestamp = number_utils.to_int_or_none(payload.get("timestamp"))
+        value = number_utils.to_float_or_none(payload.get("value"))
+        if not isinstance(series_name, str) or timestamp is None or value is None:
             return
 
-        values = {
-            str(key): parsed
-            for key, raw_value in sample.items()
-            if key != "timestamp" and (parsed := number_utils.to_float_or_none(raw_value)) is not None
-        }
-        if not values:
-            return
+        self.publish(series_name, timestamp, value)
 
+    def publish(self, series_name: str, timestamp: int, value: float) -> None:
         with self._lock:
-            subscribers = list(self._subscribers.values())
+            subscribers = [
+                subscriber
+                for subscriber in self._subscribers.values()
+                if series_name in subscriber.series
+            ]
 
         for subscriber in subscribers:
-            filtered_values = {
-                key: value
-                for key, value in values.items()
-                if key in subscriber.series
-            }
-            if not filtered_values:
-                continue
-
             payload = {
                 "timestamp": timestamp,
-                "values": filtered_values,
+                "values": {series_name: value},
             }
 
             try:

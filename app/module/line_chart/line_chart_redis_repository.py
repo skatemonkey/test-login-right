@@ -5,14 +5,27 @@ import redis
 
 from app.core import redis_ext
 
-REDIS_KEY = "line_chart:points"
+HISTORY_KEY_PREFIX = "chart_history:"
 LIVE_UPDATES_CHANNEL = "line_chart:updates"
 RECONNECT_DELAY_SECONDS = 1
 
 
-def fetch_history_rows(start: int, end: int) -> list[str]:
+def history_key(series_name: str) -> str:
+    return f"{HISTORY_KEY_PREFIX}{series_name}"
+
+
+def fetch_history_rows(series_names: list[str], start: int, end: int) -> dict[str, list[str]]:
     redis_client = redis_ext.get_redis()
-    return redis_client.zrangebyscore(REDIS_KEY, start, end)
+    pipeline = redis_client.pipeline()
+
+    for series_name in series_names:
+        pipeline.zrangebyscore(history_key(series_name), start, end)
+
+    rows = pipeline.execute()
+    return {
+        series_name: series_rows
+        for series_name, series_rows in zip(series_names, rows, strict=False)
+    }
 
 
 def listen_for_live_updates(
