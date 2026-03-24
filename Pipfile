@@ -20,5 +20,4 @@ ruff = "*"
 isort = "*"
 
 [requires]
-python_version = "3.14"
-python_full_version = "3.14.2"
+python_version = "3.13"
