@@ -5,6 +5,8 @@ import time
 
 import redis
 
+from app.shared.registry.line_chart_series_registry import AVAILABLE_SERIES
+
 REDIS_URL = (
     "redis://default:pD8Pvvvx3R2mzZUEzUrCqwtQxobrEpr8@"
     "redis-15870.c11.us-east-1-2.ec2.cloud.redislabs.com:15870"
@@ -15,7 +17,7 @@ LIVE_UPDATES_CHANNEL = "line_chart:updates"
 SAMPLE_INTERVAL_SECONDS = 5
 INITIAL_HISTORY_SECONDS = 5 * 60 * 60
 RETENTION_SECONDS = 7 * 24 * 60 * 60
-SERIES_NAMES = ("cpu", "network", "memory")
+SERIES_NAMES = AVAILABLE_SERIES
 
 
 def create_sample(timestamp):

@@ -2,12 +2,11 @@ from collections.abc import Iterable
 
 from app.module.line_chart import line_chart_redis_repository
 from app.shared.schemas.api_response_schema import ErrorResponse
+from app.shared.registry.line_chart_series_registry import AVAILABLE_SERIES
 from app.shared.schemas.line_chart_schema import (
     LineChartHistoryRequest,
     LineChartHistoryResponse,
 )
-
-DEFAULT_SERIES = ("cpu", "network", "memory")
 
 
 def fetch_history(body: LineChartHistoryRequest):
@@ -21,7 +20,7 @@ def fetch_history(body: LineChartHistoryRequest):
 
 
 def normalize_series(series: Iterable[str] | None) -> list[str]:
-    candidates = list(series or DEFAULT_SERIES)
+    candidates = list(series or AVAILABLE_SERIES)
     normalized: list[str] = []
     seen: set[str] = set()
 
@@ -35,7 +34,7 @@ def normalize_series(series: Iterable[str] | None) -> list[str]:
     if normalized:
         return normalized
 
-    return list(DEFAULT_SERIES)
+    return list(AVAILABLE_SERIES)
 
 
 def parse_series_query(raw_series: str | None) -> list[str]:

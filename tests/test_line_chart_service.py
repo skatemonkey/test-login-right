@@ -2,10 +2,14 @@ import unittest
 from unittest.mock import patch
 
 from app.module.line_chart import line_chart_service
+from app.shared.registry.line_chart_series_registry import AVAILABLE_SERIES
 from app.shared.schemas.line_chart_schema import LineChartHistoryRequest, LineChartPoint, LineChartSeries
 
 
 class LineChartServiceTestCase(unittest.TestCase):
+    def test_parse_series_query_defaults_to_available_series(self):
+        self.assertEqual(line_chart_service.parse_series_query(None), list(AVAILABLE_SERIES))
+
     def test_fetch_history_returns_requested_series(self):
         history_series = [
             LineChartSeries(
