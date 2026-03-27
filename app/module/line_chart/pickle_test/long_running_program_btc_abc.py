@@ -10,20 +10,21 @@ REDIS_URL = (
     "redis-15870.c11.us-east-1-2.ec2.cloud.redislabs.com:15870"
 )
 HISTORY_KEY_PREFIX = "chart_history:"
-LEGACY_REDIS_KEY = "line_chart:points"
 LIVE_UPDATES_CHANNEL = "line_chart:updates"
 SAMPLE_INTERVAL_SECONDS = 5
 INITIAL_HISTORY_SECONDS = 5 * 60 * 60
 RETENTION_SECONDS = 7 * 24 * 60 * 60
-SERIES_NAMES = ("cpu", "network", "memory")
+SERIES_NAMES = ("btc", "abc")
 
 
 def create_sample(timestamp):
+    btc_price = round(random.uniform(30_000, 90_000), 2)
+    abc_price = round(btc_price - random.uniform(100, 1_500), 2)
+
     return {
         "timestamp": timestamp,
-        "cpu": round(random.uniform(10, 90), 2),
-        "network": round(random.uniform(100, 1000), 2),
-        "memory": round(random.uniform(20, 95), 2),
+        "btc": btc_price,
+        "abc": abc_price,
     }
 
 
@@ -78,10 +79,7 @@ def reset_and_seed_history(
     timestamp = int(time.time()) if now is None else now
     start_timestamp = timestamp - history_seconds
 
-    members_by_series = {
-        series_name: {}
-        for series_name in SERIES_NAMES
-    }
+    members_by_series = {series_name: {} for series_name in SERIES_NAMES}
     seeded_count = 0
     for sample_timestamp in range(start_timestamp, timestamp + 1, interval_seconds):
         sample = create_sample(sample_timestamp)
@@ -92,10 +90,7 @@ def reset_and_seed_history(
                 serialize_history_point(sample_timestamp, sample[series_name])
             ] = sample_timestamp
 
-    redis_client.delete(
-        LEGACY_REDIS_KEY,
-        *(history_key(series_name) for series_name in SERIES_NAMES),
-    )
+    redis_client.delete(*(history_key(series_name) for series_name in SERIES_NAMES))
     for series_name, members in members_by_series.items():
         if members:
             redis_client.zadd(history_key(series_name), members)
@@ -111,7 +106,7 @@ def run_once(redis_client, now=None):
     readable_time = datetime.fromtimestamp(timestamp, UTC).isoformat()
     print(
         f"[{readable_time}] saved "
-        f"cpu={sample['cpu']} network={sample['network']} memory={sample['memory']} "
+        f"btc={sample['btc']} abc={sample['abc']} "
         f"pruned={removed_count}"
     )
 

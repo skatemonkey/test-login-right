@@ -1,1 +1,1 @@
-AVAILABLE_SERIES = ("cpu", "network", "memory")
+AVAILABLE_SERIES = ("cpu", "network", "memory", "btc", "abc")

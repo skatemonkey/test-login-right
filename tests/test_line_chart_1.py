@@ -20,6 +20,9 @@ class StopLoop(Exception):
 
 
 class LineChart1TestCase(unittest.TestCase):
+    def test_series_names_remain_pinned_to_original_series(self):
+        self.assertEqual(line_chart_1.SERIES_NAMES, ("cpu", "network", "memory"))
+
     def test_create_sample_has_expected_shape_and_ranges(self):
         sample = line_chart_1.create_sample(1234567890)
 

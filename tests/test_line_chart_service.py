@@ -9,6 +9,10 @@ from app.shared.schemas.line_chart_schema import LineChartHistoryRequest, LineCh
 class LineChartServiceTestCase(unittest.TestCase):
     def test_parse_series_query_defaults_to_available_series(self):
         self.assertEqual(line_chart_service.parse_series_query(None), list(AVAILABLE_SERIES))
+        self.assertEqual(
+            line_chart_service.parse_series_query(None),
+            ["cpu", "network", "memory", "btc", "abc"],
+        )
 
     def test_fetch_history_returns_requested_series(self):
         history_series = [
