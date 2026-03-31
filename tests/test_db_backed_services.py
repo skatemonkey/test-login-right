@@ -19,7 +19,11 @@ from app.shared.schemas.permission_schema import (
     PermissionListQuery,
     PermissionUpdateRequest,
 )
-from app.shared.schemas.user_schema import UserCreateRequest, UserListQuery, UserUpdateRequest
+from app.shared.schemas.user_schema import (
+    UserCreateRequest,
+    UserListQuery,
+    UserUpdateRequest,
+)
 
 
 class AuthServiceTestCase(unittest.TestCase):
@@ -597,6 +601,24 @@ class UserServiceTestCase(unittest.TestCase):
                 "totalElements": 1,
                 "totalPages": 1,
             },
+        )
+
+    def test_get_user_options_returns_minimal_user_list(self):
+        users = [
+            SimpleNamespace(user_id=2, username="alice"),
+            SimpleNamespace(user_id=5, username="zoe"),
+        ]
+
+        with patch.object(user_service.user_repository, "list_user_options", return_value=users):
+            result, status = user_service.get_user_options()
+
+        self.assertEqual(status, 200)
+        self.assertEqual(
+            result.model_dump(),
+            [
+                {"userId": 2, "username": "alice"},
+                {"userId": 5, "username": "zoe"},
+            ],
         )
 
     def test_get_user_detail_maps_permission_ids(self):

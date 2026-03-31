@@ -22,6 +22,14 @@ def query_users(body: UserListQuery):
     return api_util.model_response(result, status)
 
 
+@user_bp.get("/options")
+@jwt_required()
+@validate()
+def get_user_options():
+    result, status = user_service.get_user_options()
+    return api_util.model_response(result, status)
+
+
 @user_bp.get("/permission-matrix")
 @jwt_required()
 @validate()

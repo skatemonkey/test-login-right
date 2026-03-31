@@ -39,6 +39,10 @@ def query_users(query: UserListQuery):
     return pagination_utils.paginate(user_query, query.page, query.pageSize)
 
 
+def list_user_options() -> list[User]:
+    return User.query.order_by(User.username.asc()).all()
+
+
 def get_permission_count_map(user_ids: Iterable[int]) -> dict[int, int]:
     user_ids_list = list(user_ids)
     if not user_ids_list:

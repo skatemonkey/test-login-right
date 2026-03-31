@@ -14,6 +14,7 @@ class AuditLogRequest(BaseModel):
 
 
 class AuditLogFilters(BaseModel):
+    userId: Optional[int] = None
     module: Optional[str] = None
     action: Optional[str] = None
     dateFrom: Optional[str] = None

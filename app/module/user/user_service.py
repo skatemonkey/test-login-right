@@ -14,6 +14,8 @@ from app.shared.schemas.user_schema import (
     UserDetail,
     UserListItem,
     UserListQuery,
+    UserOptionItem,
+    UserOptionsResponse,
     UserPermissionToggleResult,
     UserUpdateRequest,
 )
@@ -54,6 +56,17 @@ def get_user_detail(user_id: int):
     if not user:
         return ErrorResponse(error="User not found"), 404
     return _map_user_detail(user), 200
+
+
+def get_user_options():
+    users = user_repository.list_user_options()
+    return UserOptionsResponse([
+        UserOptionItem(
+            userId=user.user_id,
+            username=user.username or "",
+        )
+        for user in users
+    ]), 200
 
 
 def create_user(req: UserCreateRequest):

@@ -45,6 +45,11 @@ class UserUpdateRequest(BaseModel):
     isActive: bool = True
 
 
+class UserOptionItem(BaseModel):
+    userId: int
+    username: str
+
+
 class UserPermissionToggleRequest(BaseModel):
     enabled: bool
 
@@ -56,6 +61,10 @@ class PermissionMatrixItem(BaseModel):
 
 
 class PermissionMatrixResponse(RootModel[list[PermissionMatrixItem]]):
+    pass
+
+
+class UserOptionsResponse(RootModel[list[UserOptionItem]]):
     pass
 
 
