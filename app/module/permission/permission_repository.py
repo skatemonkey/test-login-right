@@ -92,7 +92,7 @@ def _apply_permission_filters(permission_query, filters: PermissionFilters | Non
         return permission_query
 
     if filters.module:
-        permission_query = permission_query.filter(Permission.module == filters.module)
+        permission_query = permission_query.filter(Permission.module.like(f"{filters.module}%"))
     if filters.action:
         permission_query = permission_query.filter(Permission.action == filters.action)
     if filters.isActive is not None:
