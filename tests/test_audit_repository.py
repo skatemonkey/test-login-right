@@ -20,7 +20,7 @@ class AuditRepositoryTestCase(unittest.TestCase):
         first_filter = log_query.filter.call_args_list[0].args[0]
         self.assertEqual(str(first_filter), str(AuditLog.user_id == 9))
 
-    def test_apply_audit_filters_skips_user_id_when_absent(self):
+    def test_apply_audit_filters_matches_module_prefix_when_present(self):
         log_query = Mock()
         log_query.filter.return_value = log_query
 
@@ -32,7 +32,7 @@ class AuditRepositoryTestCase(unittest.TestCase):
         self.assertIs(result, log_query)
         self.assertEqual(len(log_query.filter.call_args_list), 1)
         first_filter = log_query.filter.call_args_list[0].args[0]
-        self.assertEqual(str(first_filter), str(AuditLog.module == "auth"))
+        self.assertEqual(str(first_filter), str(AuditLog.module.like("auth%")))
 
 
 if __name__ == "__main__":

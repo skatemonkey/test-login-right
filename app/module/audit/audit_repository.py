@@ -69,7 +69,7 @@ def _apply_audit_filters(log_query, filters: AuditLogFilters | None):
     if filters.userId is not None:
         log_query = log_query.filter(AuditLog.user_id == filters.userId)
     if filters.module:
-        log_query = log_query.filter(AuditLog.module == filters.module)
+        log_query = log_query.filter(AuditLog.module.like(f"{filters.module}%"))
     if filters.action:
         log_query = log_query.filter(AuditLog.action == filters.action)
     if filters.dateFrom:
