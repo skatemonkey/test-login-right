@@ -1,4 +1,3 @@
-import json
 import unittest
 from unittest.mock import Mock, call, patch
 
@@ -9,9 +8,10 @@ class LineChartRedisRepositoryTestCase(unittest.TestCase):
     def test_fetch_history_series_returns_requested_series_in_order(self):
         redis_client = Mock()
         pipeline = Mock()
+        ts_client = pipeline.ts.return_value
         pipeline.execute.return_value = [
-            [json.dumps({"timestamp": 10, "value": 20}), json.dumps({"timestamp": 11, "value": 21})],
-            [json.dumps({"timestamp": 10, "value": 45}), json.dumps({"timestamp": 11, "value": 46})],
+            [(10, 20), (11, 21)],
+            [(10, 45), (11, 46)],
         ]
         redis_client.pipeline.return_value = pipeline
 
@@ -42,8 +42,9 @@ class LineChartRedisRepositoryTestCase(unittest.TestCase):
             ],
         )
         redis_client.pipeline.assert_called_once_with()
+        pipeline.ts.assert_called_once_with()
         self.assertEqual(
-            pipeline.zrangebyscore.call_args_list,
+            ts_client.range.call_args_list,
             [
                 call(line_chart_redis_repository.history_key("cpu"), 10, 20),
                 call(line_chart_redis_repository.history_key("memory"), 10, 20),
@@ -54,10 +55,11 @@ class LineChartRedisRepositoryTestCase(unittest.TestCase):
     def test_fetch_history_series_preserves_duplicate_and_case_sensitive_requests(self):
         redis_client = Mock()
         pipeline = Mock()
+        ts_client = pipeline.ts.return_value
         pipeline.execute.return_value = [
             [],
-            [json.dumps({"timestamp": 10, "value": 20})],
-            [json.dumps({"timestamp": 10, "value": 20})],
+            [(10, 20)],
+            [(10, 20)],
         ]
         redis_client.pipeline.return_value = pipeline
 
@@ -77,7 +79,7 @@ class LineChartRedisRepositoryTestCase(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            pipeline.zrangebyscore.call_args_list,
+            ts_client.range.call_args_list,
             [
                 call(line_chart_redis_repository.history_key("CPU"), 10, 20),
                 call(line_chart_redis_repository.history_key("cpu"), 10, 20),
@@ -88,11 +90,12 @@ class LineChartRedisRepositoryTestCase(unittest.TestCase):
     def test_fetch_history_series_ignores_malformed_rows(self):
         redis_client = Mock()
         pipeline = Mock()
+        pipeline.ts.return_value = Mock()
         pipeline.execute.return_value = [[
-            "not-json",
-            json.dumps({"timestamp": "bad", "value": 1}),
-            json.dumps({"timestamp": 10, "value": "n/a"}),
-            json.dumps({"timestamp": 11, "value": 18.5}),
+            "not-a-point",
+            ("bad", 1),
+            (10, "n/a"),
+            (11, 18.5),
         ]]
         redis_client.pipeline.return_value = pipeline
 
@@ -116,6 +119,7 @@ class LineChartRedisRepositoryTestCase(unittest.TestCase):
     def test_fetch_history_series_returns_empty_points_for_empty_window(self):
         redis_client = Mock()
         pipeline = Mock()
+        pipeline.ts.return_value = Mock()
         pipeline.execute.return_value = [[], []]
         redis_client.pipeline.return_value = pipeline
 

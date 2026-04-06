@@ -1,5 +1,4 @@
 from collections.abc import Callable
-import json
 import time
 
 import redis
@@ -8,7 +7,7 @@ from app.core import redis_ext
 from app.shared.schemas.line_chart_schema import LineChartPoint, LineChartSeries
 from app.shared.utils import number_utils
 
-HISTORY_KEY_PREFIX = "chart_history:"
+HISTORY_KEY_PREFIX = "ts:line_chart:"
 LIVE_UPDATES_CHANNEL = "line_chart:updates"
 RECONNECT_DELAY_SECONDS = 1
 
@@ -20,9 +19,10 @@ def history_key(series_name: str) -> str:
 def fetch_history_series(series_names: list[str], start: int, end: int) -> list[LineChartSeries]:
     redis_client = redis_ext.get_redis()
     pipeline = redis_client.pipeline()
+    ts_client = pipeline.ts()
 
     for series_name in series_names:
-        pipeline.zrangebyscore(history_key(series_name), start, end)
+        ts_client.range(history_key(series_name), start, end)
 
     rows = pipeline.execute()
     return [
@@ -31,32 +31,22 @@ def fetch_history_series(series_names: list[str], start: int, end: int) -> list[
     ]
 
 
-def _parse_points(rows: list[str]) -> list[LineChartPoint]:
+def _parse_points(rows: list[object]) -> list[LineChartPoint]:
     points: list[LineChartPoint] = []
 
     for row in rows:
-        point = _parse_point(row)
-        if point is not None:
-            points.append(point)
+        # redis-py TS.RANGE returns one sample per row as `(timestamp, value)`.
+        if not isinstance(row, tuple) or len(row) != 2:
+            continue
+
+        timestamp = number_utils.to_int_or_none(row[0])
+        value = number_utils.to_float_or_none(row[1])
+        if timestamp is None or value is None:
+            continue
+
+        points.append(LineChartPoint(x=timestamp, y=value))
 
     return points
-
-
-def _parse_point(raw_row: str) -> LineChartPoint | None:
-    try:
-        payload = json.loads(raw_row)
-    except (TypeError, json.JSONDecodeError):
-        return None
-
-    if not isinstance(payload, dict):
-        return None
-
-    timestamp = number_utils.to_int_or_none(payload.get("timestamp"))
-    value = number_utils.to_float_or_none(payload.get("value"))
-    if timestamp is None or value is None:
-        return None
-
-    return LineChartPoint(x=timestamp, y=value)
 
 
 def listen_for_live_updates(
