@@ -1,5 +1,4 @@
 import importlib.util
-import json
 from pathlib import Path
 import unittest
 from unittest.mock import Mock, call, patch
@@ -31,10 +30,10 @@ class LineChartBtcAbcTestCase(unittest.TestCase):
         self.assertGreaterEqual(sample["btc"] - sample["abc"], 100)
         self.assertLessEqual(sample["btc"] - sample["abc"], 1_500)
 
-    def test_run_once_writes_sample_and_prunes_old_entries(self):
+    def test_run_once_writes_sample_to_redis_timeseries(self):
         redis_client = Mock()
-        redis_client.zremrangebyscore.side_effect = [2, 2]
-        now = 1700000000
+        ts_client = redis_client.ts.return_value
+        now = 1700000000000
 
         with patch.object(
             line_chart_btc_abc.random,
@@ -49,18 +48,37 @@ class LineChartBtcAbcTestCase(unittest.TestCase):
             "abc": 41802.35,
         }
         self.assertEqual(sample, expected_sample)
-        self.assertEqual(removed_count, 4)
+        self.assertEqual(removed_count, 0)
+        self.assertEqual(line_chart_btc_abc.history_key("btc"), "ts:line_chart:btc")
+        self.assertEqual(line_chart_btc_abc.history_key("abc"), "ts:line_chart:abc")
 
         self.assertEqual(
-            redis_client.zadd.call_args_list,
+            ts_client.create.call_args_list,
             [
                 call(
                     line_chart_btc_abc.history_key("btc"),
-                    {line_chart_btc_abc.serialize_history_point(now, 42123.46): now},
+                    retention_msecs=line_chart_btc_abc.RETENTION_MILLISECONDS,
                 ),
                 call(
                     line_chart_btc_abc.history_key("abc"),
-                    {line_chart_btc_abc.serialize_history_point(now, 41802.35): now},
+                    retention_msecs=line_chart_btc_abc.RETENTION_MILLISECONDS,
+                ),
+            ],
+        )
+        self.assertEqual(
+            ts_client.add.call_args_list,
+            [
+                call(
+                    line_chart_btc_abc.history_key("btc"),
+                    now,
+                    42123.46,
+                    duplicate_policy="LAST",
+                ),
+                call(
+                    line_chart_btc_abc.history_key("abc"),
+                    now,
+                    41802.35,
+                    duplicate_policy="LAST",
                 ),
             ],
         )
@@ -77,24 +95,11 @@ class LineChartBtcAbcTestCase(unittest.TestCase):
                 ),
             ],
         )
-        self.assertEqual(
-            redis_client.zremrangebyscore.call_args_list,
-            [
-                call(
-                    line_chart_btc_abc.history_key("btc"),
-                    "-inf",
-                    now - line_chart_btc_abc.RETENTION_SECONDS - 1,
-                ),
-                call(
-                    line_chart_btc_abc.history_key("abc"),
-                    "-inf",
-                    now - line_chart_btc_abc.RETENTION_SECONDS - 1,
-                ),
-            ],
-        )
+        redis_client.zremrangebyscore.assert_not_called()
 
     def test_reset_and_seed_history_deletes_only_own_series_keys(self):
         redis_client = Mock()
+        ts_client = redis_client.ts.return_value
 
         def make_sample(timestamp):
             return {
@@ -106,7 +111,7 @@ class LineChartBtcAbcTestCase(unittest.TestCase):
         with patch.object(line_chart_btc_abc, "create_sample", side_effect=make_sample):
             seeded_count = line_chart_btc_abc.reset_and_seed_history(
                 redis_client,
-                now=100,
+                now=100_000,
                 history_seconds=10,
                 interval_seconds=5,
             )
@@ -116,33 +121,35 @@ class LineChartBtcAbcTestCase(unittest.TestCase):
             line_chart_btc_abc.history_key("btc"),
             line_chart_btc_abc.history_key("abc"),
         )
-        self.assertEqual(len(redis_client.zadd.call_args_list), len(line_chart_btc_abc.SERIES_NAMES))
-
-        stored_members_by_key = {
-            zadd_call.args[0]: zadd_call.args[1]
-            for zadd_call in redis_client.zadd.call_args_list
-        }
-        expected_points = {
-            line_chart_btc_abc.history_key("btc"): [
-                {"timestamp": 90, "value": 90.0},
-                {"timestamp": 95, "value": 95.0},
-                {"timestamp": 100, "value": 100.0},
+        self.assertEqual(
+            ts_client.create.call_args_list,
+            [
+                call(
+                    line_chart_btc_abc.history_key("btc"),
+                    retention_msecs=line_chart_btc_abc.RETENTION_MILLISECONDS,
+                ),
+                call(
+                    line_chart_btc_abc.history_key("abc"),
+                    retention_msecs=line_chart_btc_abc.RETENTION_MILLISECONDS,
+                ),
             ],
-            line_chart_btc_abc.history_key("abc"): [
-                {"timestamp": 90, "value": 89.0},
-                {"timestamp": 95, "value": 94.0},
-                {"timestamp": 100, "value": 99.0},
+        )
+        self.assertEqual(
+            ts_client.madd.call_args_list,
+            [
+                call(
+                    [
+                        (line_chart_btc_abc.history_key("btc"), 90_000, 90_000.0),
+                        (line_chart_btc_abc.history_key("abc"), 90_000, 89_999.0),
+                        (line_chart_btc_abc.history_key("btc"), 95_000, 95_000.0),
+                        (line_chart_btc_abc.history_key("abc"), 95_000, 94_999.0),
+                        (line_chart_btc_abc.history_key("btc"), 100_000, 100_000.0),
+                        (line_chart_btc_abc.history_key("abc"), 100_000, 99_999.0),
+                    ]
+                ),
             ],
-        }
-
-        for key, expected_series_points in expected_points.items():
-            stored_members = stored_members_by_key[key]
-            self.assertEqual(sorted(stored_members.values()), [90, 95, 100])
-            decoded_points = sorted(
-                (json.loads(payload) for payload in stored_members),
-                key=lambda point: point["timestamp"],
-            )
-            self.assertEqual(decoded_points, expected_series_points)
+        )
+        ts_client.add.assert_not_called()
         redis_client.publish.assert_not_called()
 
     def test_run_forever_runs_one_iteration_before_sleep_stops(self):
@@ -159,7 +166,7 @@ class LineChartBtcAbcTestCase(unittest.TestCase):
                     time_func=lambda: 123,
                 )
 
-        run_once.assert_called_once_with(redis_client, now=123)
+        run_once.assert_called_once_with(redis_client, now=123000)
 
     def test_run_forever_can_sleep_before_first_iteration(self):
         redis_client = Mock()
@@ -176,7 +183,7 @@ class LineChartBtcAbcTestCase(unittest.TestCase):
                 )
 
         sleep.assert_any_call(5)
-        run_once.assert_called_once_with(redis_client, now=456)
+        run_once.assert_called_once_with(redis_client, now=456000)
 
 
 if __name__ == "__main__":
