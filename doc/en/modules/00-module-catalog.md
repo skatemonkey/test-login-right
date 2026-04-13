@@ -43,7 +43,7 @@ Read [../00-doc-catalog.md](../00-doc-catalog.md) first and [../01-overview.md](
 
 ## 4. `line_chart` (`app/module/line_chart`)
 - Blueprint prefix: `/line-chart`
-- Data access: Redis-backed module with a dedicated repository layer for sorted-set history and pubsub access.
+- Data access: Redis-backed module with a dedicated repository layer for RedisTimeSeries history and pub/sub access.
 - Endpoints:
   - `POST /line-chart/history`
   - `GET /line-chart/stream` (SSE)
@@ -54,6 +54,7 @@ Read [../00-doc-catalog.md](../00-doc-catalog.md) first and [../01-overview.md](
   - `app/module/line_chart/line_chart_stream_service.py`
   - `app/shared/schemas/line_chart_schema.py`
   - `app/module/line_chart/pickle_test/long_running_program_demo.py`
+  - `app/module/line_chart/pickle_test/long_running_program_btc_abc.py`
 
 ## 5. `table` (`app/module/table`)
 - Blueprint prefix: `/tables`

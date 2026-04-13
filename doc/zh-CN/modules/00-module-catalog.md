@@ -43,7 +43,7 @@
 
 ## 4. `line_chart` (`app/module/line_chart`)
 - Blueprint 前缀：`/line-chart`
-- 数据访问：这是基于 Redis 的模块，使用独立 repository 层处理 sorted set 历史查询与 pubsub 访问。
+- 数据访问：这是基于 Redis 的模块，使用独立 repository 层处理 RedisTimeSeries 历史查询与 pub/sub 访问。
 - 接口：
   - `POST /line-chart/history`
   - `GET /line-chart/stream` (SSE)
@@ -54,6 +54,7 @@
   - `app/module/line_chart/line_chart_stream_service.py`
   - `app/shared/schemas/line_chart_schema.py`
   - `app/module/line_chart/pickle_test/long_running_program_demo.py`
+  - `app/module/line_chart/pickle_test/long_running_program_btc_abc.py`
 
 ## 5. `table` (`app/module/table`)
 - Blueprint 前缀：`/tables`
